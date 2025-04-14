@@ -1,0 +1,7 @@
+authtoken: 2vTX0pttpcrpp9juVJsomaZ9mRV_7dnCVyjwGxcQKTXopEuLb
+version: 2
+tunnels:
+  mini-app:
+    addr: 80
+    proto: http
+    hostname: bluejay-pretty-clearly.ngrok-free.app

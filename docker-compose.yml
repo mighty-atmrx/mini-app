@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+    php:
+        build: .
+        container_name: php_container
+        volumes:
+            -   .:/var/www
+        networks:
+            -   app-network
+        depends_on:
+            -   db
+        environment:
+            - APP_ENV=local
+            - APP_DEBUG=true
+            - APP_KEY=base64:XtU/MsV2t9A6qiy+oeZJgu8PUvqbk/efk4cMSe4MYTw=
+            - DB_CONNECTION=pgsql
+            - DB_HOST=db
+            - DB_PORT=5432
+            - DB_DATABASE=mini-app
+            - DB_USERNAME=user
+            - DB_PASSWORD=password
+            - TELEGRAPH_BOT_TOKEN=7832988958:AAG1S4X7Oiv9Z5hha5AbAPrZRJDzict2aW4
+
+    nginx:
+        image: nginx:alpine
+        container_name: nginx_container
+        ports:
+            -   '80:80'
+        volumes:
+            -   .:/var/www
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            -   php
+        networks:
+            - app-network
+
+    db:
+        image: postgres:14.17
+        container_name: db_container
+        environment:
+            POSTGRES_USER: user
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: mini-app
+        volumes:
+            -   db-data:/var/lib/postgresql/data
+            - ./pg_hba.conf:/etc/postgresql/data/pg_hba.conf
+        ports:
+            -   "5432:5432"
+        networks:
+            - app-network
+
+networks:
+    app-network:
+        driver: bridge
+
+volumes:
+    db-data:
