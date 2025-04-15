@@ -9,9 +9,9 @@ class UserRepository
     public function findByTelegramId(string $telegramId): ?User
     {
         $telegramId = trim($telegramId);
-        $hashedTelegramId = hash('sha256', $telegramId);
+        \Log::info('User repository', ['user' => $telegramId]);
 
-        return User::where('telegram_user_id', $hashedTelegramId)->first();
+        return User::where('telegram_user_id', $telegramId)->first();
     }
 
     public function save(array $data, string $telegramId): User

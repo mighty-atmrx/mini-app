@@ -1,15 +1,119 @@
-<!DOCTYPE html>
-<html>
 <head>
-    <title>My Mini App</title>
+    <meta charset="UTF-8">
+    <title>Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-<h1>Welcome to My Mini App!</h1>
-<button onclick="Telegram.WebApp.close()">Close</button>
+<div id="user-info"></div>
 <script>
     Telegram.WebApp.ready();
     Telegram.WebApp.expand();
+
+    const API_URL = 'https://bluejay-pretty-clearly.ngrok-free.app/api';
+    const BOT_URL = 'https://t.me/ExpertMiniAppBot';
+
+    async function authenticate() {
+        const initData = Telegram.WebApp.initData;
+        console.log('initData:', initData);
+        if (!initData || typeof initData !== 'string') {
+            showError('Ошибка: неверный формат initData.');
+            return;
+        }
+        console.log('Sending to:', `${API_URL}/auth/telegram`);
+        try {
+            const response = await fetch(`${API_URL}/auth/telegram`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ initData })
+            });
+            console.log('Response status:', response.status);
+            const data = await response.json();
+            console.log('Response data:', data);
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            localStorage.setItem('jwt_token', data.token);
+            showMessage('Авторизация успешна!');
+            fetchUser();
+        } catch (error) {
+            console.error('Auth error:', error.message);
+            showError(`Ошибка авторизации: ${error.message}`);
+            Telegram.WebApp.openTelegramLink(BOT_URL);
+        }
+    }
+
+    async function fetchUser() {
+        const token = localStorage.getItem('jwt_token');
+        if (!token) {
+            showError('Требуется авторизация.');
+            Telegram.WebApp.openTelegramLink(BOT_URL);
+            return;
+        }
+        try {
+            const response = await fetch(`${API_URL}/user`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Unauthorized');
+            }
+            const user = await response.json();
+            displayUser(user);
+        } catch (error) {
+            showError('Ошибка доступа. Авторизуйся заново.');
+            localStorage.removeItem('jwt_token');
+            Telegram.WebApp.openTelegramLink(BOT_URL);
+        }
+    }
+
+    function displayUser(user) {
+        const userInfo = document.getElementById('user-info');
+        userInfo.innerHTML = `
+                <p><strong>Имя:</strong> ${user.first_name}</p>
+                <p><strong>Фамилия:</strong> ${user.last_name || '—'}</p>
+                <p><strong>Телефон:</strong> ${user.phone}</p>
+                <p><strong>Дата рождения:</strong> ${formatDate(user.birthdate)}</p>
+            `;
+    }
+
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('ru-RU');
+    }
+
+    function showMessage(message) {
+        const userInfo = document.getElementById('user-info');
+        userInfo.innerHTML = `<p>${message}</p>`;
+    }
+
+    function showError(message) {
+        const userInfo = document.getElementById('user-info');
+        userInfo.innerHTML = `<p class="error">${message}</p>`;
+    }
+
+    function logout() {
+        localStorage.removeItem('jwt_token');
+        showMessage('Вы вышли.');
+        document.getElementById('user-info').innerHTML = '';
+    }
+
+    Telegram.WebApp.ready();
+    setTimeout(() => {
+        console.log('initData:', Telegram.WebApp.initData);
+        if (!Telegram.WebApp.initData) {
+            showError('Ошибка: initData недоступно. Открой через бота.');
+            return;
+        }
+        if (localStorage.getItem('jwt_token')) {
+            fetchUser();
+        } else {
+            authenticate();
+        }
+    }, 100);
 </script>
 </body>
-</html>

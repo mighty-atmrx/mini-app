@@ -34,7 +34,7 @@ class Handler extends WebhookHandler
 
         $imageUrl = config('telegram.image_url', 'https://bluejay-pretty-clearly.ngrok-free.app/expert.jpg');
 
-        $user = $this->userRepository->findByTelegramId($this->chat->chat_id);
+        $user = $this->userRepository->findByTelegramId(hash('sha256', $this->chat->chat_id));
         \Log::info('User check in start', [
             'telegram_id' => $this->chat->chat_id,
             'user_found' => $user ? $user->toArray() : null,
