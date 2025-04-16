@@ -11,6 +11,7 @@ use app\Telegram\State\StateManager;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
 use DefStudio\Telegraph\Keyboard\Button;
 use DefStudio\Telegraph\Keyboard\Keyboard;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Stringable;
 
 class Handler extends WebhookHandler
@@ -132,7 +133,12 @@ class Handler extends WebhookHandler
         } else {
             $userData = $stateManager->getUserData($this->chat);
             try {
-                $this->userRepository->save($userData, $this->chat->chat_id);
+                $user = DB::transaction(function () use ($userData) {
+                    $user = $this->userRepository->save($userData, $this->chat->chat_id);
+                    \Log::info('User created in transaction', ['user_id' => $user->id]);
+                    return $user;
+                });
+                \Log::info('User synced', ['user_id' => $user->id]);
                 $response = $this->chat->message("Регистрация завершена!\nИмя: {$userData['first_name']}\nФамилия: {$userData['last_name']}\nТелефон: {$userData['phone']}\nДата рождения: {$userData['birthdate']}")
                     ->keyboard(KeyboardFactory::makeAppKeyboard(config('telegram.mini_app_url')))
                     ->send();

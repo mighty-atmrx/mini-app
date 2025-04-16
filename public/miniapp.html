@@ -13,33 +13,29 @@
     const BOT_URL = 'https://t.me/ExpertMiniAppBot';
 
     async function authenticate() {
-        const initData = Telegram.WebApp.initData;
-        console.log('initData:', initData);
-        if (!initData || typeof initData !== 'string') {
-            showError('Ошибка: неверный формат initData.');
-            return;
-        }
-        console.log('Sending to:', `${API_URL}/auth/telegram`);
         try {
+            const initData = Telegram.WebApp.initData;
+            console.log('Sending initData:', initData);
             const response = await fetch(`${API_URL}/auth/telegram`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ initData })
             });
-            console.log('Response status:', response.status);
-            const data = await response.json();
-            console.log('Response data:', data);
-            if (data.error) {
-                throw new Error(data.error);
+            console.log('Auth response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`Auth failed: ${response.status}`);
             }
-            localStorage.setItem('jwt_token', data.token);
-            showMessage('Авторизация успешна!');
-            fetchUser();
+            const data = await response.json();
+            console.log('Auth response:', data);
+            if (data.token) {
+                localStorage.setItem('jwt_token', data.token);
+                fetchUser();
+            } else {
+                throw new Error('No token received');
+            }
         } catch (error) {
             console.error('Auth error:', error.message);
-            showError(`Ошибка авторизации: ${error.message}`);
+            showError('Ошибка авторизации. Попробуй снова.');
             Telegram.WebApp.openTelegramLink(BOT_URL);
         }
     }
@@ -47,11 +43,14 @@
     async function fetchUser() {
         const token = localStorage.getItem('jwt_token');
         if (!token) {
+            console.error('No token found');
             showError('Требуется авторизация.');
-            Telegram.WebApp.openTelegramLink(BOT_URL);
+            authenticate();
             return;
         }
         try {
+            console.log('Fetching user with token:', token.substring(0, 20) + '...');
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Задержка
             const response = await fetch(`${API_URL}/user`, {
                 method: 'GET',
                 headers: {
@@ -59,17 +58,24 @@
                     'Content-Type': 'application/json',
                 }
             });
+            console.log('GET /api/user status:', response.status);
             if (!response.ok) {
-                throw new Error('Unauthorized');
+                localStorage.removeItem('jwt_token');
+                throw new Error(`HTTP error: ${response.status}`);
             }
             const user = await response.json();
+            console.log('User data:', user);
             displayUser(user);
         } catch (error) {
-            showError('Ошибка доступа. Авторизуйся заново.');
+            console.error('Fetch user error:', error.message);
+            showError('Ошибка доступа. Повтори авторизацию.');
             localStorage.removeItem('jwt_token');
-            Telegram.WebApp.openTelegramLink(BOT_URL);
+            authenticate();
         }
     }
+
+    Telegram.WebApp.ready();
+    authenticate();
 
     function displayUser(user) {
         const userInfo = document.getElementById('user-info');

@@ -22,28 +22,30 @@ class TelegramAuthController extends Controller
     }
     public function authenticate(Request $request)
     {
-        \Log::info('1111');
-        if (!$request->has('initData')) {
-            return response()->json(['error' => 'initData is required'], 400);
-        }
-        \Log::info('22222');
+        \Log::info('Auth request received', ['input' => $request->all()]);
 
-        $userData = $this->telegramAuthService->verifyInitData($request->input('initData'));
-        if ($userData) {
-            $user = $this->userRepository->findByTelegramId(hash('sha256', (string)$userData['id']));
-            if ($user) {
-                \Log::info('User authenticated', ['user_id' => $user->id, 'telegram_id' => $userData['id']]);
-                try {
-                    $token = JWTAuth::fromUser($user);
-                } catch (\Exception $e) {
-                    \Log::error('JWT error', ['error' => $e->getMessage()]);
-                    return response()->json(['error' => 'Authentication failed'], 500);
-                }
-                return response()->json(['token' => $token]);
+        try {
+            $userData = $this->telegramAuthService->verifyInitData($request->input('initData'));
+            if (!$userData) {
+                \Log::error('Invalid userData');
+                return response()->json(['error' => 'Invalid userData'], 401);
             }
-            \Log::error('User not found', ['user_id' => $userData['id'], hash('sha256', (string)$userData['id'])]);
-            return response()->json(['error' => 'User not found'], 401);
+
+            $telegramId = (string)$userData['id'];
+            $hashedTelegramId = hash('sha256', $telegramId);
+            \Log::info('Hashed telegramId', ['telegram_id' => $telegramId, 'hashed_telegram_id' => $hashedTelegramId]);
+            $user = $this->userRepository->findByTelegramId($hashedTelegramId);
+            if (!$user) {
+                \Log::error('User not found');
+                return response()->json(['error' => 'User not found'], 401);
+            }
+
+            $token = JWTAuth::fromUser($user);
+            \Log::info('Token', ['user_id' => $user->id, 'token' => substr($token, 0, 20) . '...']);
+            return response()->json(['token' => $token]);
+        } catch (\Exception $e) {
+            \Log::error('Auth error: ', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Authorization error ' . $e->getMessage()], 401);
         }
-        return response()->json(['error' => 'Invalid initData'], 401);
     }
 }
