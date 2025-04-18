@@ -8,6 +8,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/api/categories', [CategoryController::class, 'index'])->name('category.index');
-
 Route::post('/telegram/webhook', [Handler::class, 'handleUserResponse']);

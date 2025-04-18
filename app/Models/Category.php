@@ -12,4 +12,9 @@ class Category extends Model
     protected $table = 'categories';
     protected $fillable = ['id', 'category'];
     protected $dates = ['created_at', 'updated_at'];
+
+    public function experts()
+    {
+        return $this->belongsToMany(Expert::class, 'expert_categories', 'category_id', 'expert_id');
+    }
 }
