@@ -32,3 +32,5 @@ Route::post('/telegram/webhook', [Handler::class, 'handleUserResponse']);
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);
 
 Route::get('/experts', [ExpertController::class, 'index'])->name('expert.index');
+
+Route::post('/users', [UserController::class, 'store'])->name('user.store');

@@ -2,17 +2,55 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Repositories\UserRepository;
+use App\Services\UserService;
+use App\Telegram\InputValidator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 
 class UserController extends Controller
 {
     protected $userRepository;
-    public function __construct(UserRepository $userRepository)
-    {
+    protected $userService;
+
+    public function __construct(
+        UserRepository $userRepository,
+        UserService $userService
+    ){
+        $this->userService = $userService;
         $this->userRepository = $userRepository;
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'telegram_user_id' => 'required|string',
+            'first_name' => 'required|string',
+            'last_name' => 'nullable|string',
+            'birthdate' => 'required|date',
+            'phone' => 'nullable|string',
+        ]);
+
+        if (!array_key_exists('last_name', $data)) {
+            $data['last_name'] = '';
+        }
+
+        $data['birthdate'] = InputValidator::formatBirthdate($data['birthdate']);
+
+        DB::beginTransaction();
+        try {
+            $user = $this->userService->userCreate($data, $data['telegram_user_id']);
+            DB::commit();
+            \Log::info('User created', ['user' => $user]);
+            return response()->json($user);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('User creation failed', ['error' => $e->getMessage()]);
+            return response()->json(['User creation failed: ' => $e->getMessage()], 500);
+        }
     }
 
     public function show(Request $request, $userTelegramId)

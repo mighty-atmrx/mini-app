@@ -3,6 +3,7 @@
 namespace App\Telegram;
 
 use App\Repositories\UserRepository;
+use App\Services\UserService;
 use App\Telegram\State\BirthdateState;
 use App\Telegram\State\NameState;
 use App\Telegram\State\PhoneManualState;
@@ -17,10 +18,12 @@ use Illuminate\Support\Stringable;
 class Handler extends WebhookHandler
 {
     private UserRepository $userRepository;
+    private $userService;
 
-    public function __construct()
+    public function __construct(UserService $userService)
     {
         parent::__construct();
+        $this->userService = $userService;
         $this->userRepository = new UserRepository();
     }
 
@@ -134,7 +137,7 @@ class Handler extends WebhookHandler
             $userData = $stateManager->getUserData($this->chat);
             try {
                 $user = DB::transaction(function () use ($userData) {
-                    $user = $this->userRepository->save($userData, $this->chat->chat_id);
+                    $user = $this->userService->userCreate($userData, $this->chat->chat_id);
                     \Log::info('User created in transaction', ['user_id' => $user->id]);
                     return $user;
                 });

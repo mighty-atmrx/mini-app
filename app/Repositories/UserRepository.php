@@ -14,26 +14,11 @@ class UserRepository
         return User::where('telegram_user_id', $telegramId)->first();
     }
 
-    public function save(array $data, string $telegramId): User
+    public function save(array $data, string $hashedTelegramId): User
     {
-        $telegramId = trim($telegramId);
-        $hashedTelegramId = hash('sha256', $telegramId);
-
         \Log::info('Saving user with telegram_id', [
-            'telegram_id' => $telegramId,
             'hashed_telegram_id' => $hashedTelegramId,
         ]);
-
-        $existingUser = User::where('telegram_user_id', $hashedTelegramId)->first();
-        if ($existingUser) {
-            \Log::warning('User already exists', [
-                'telegram_id' => $telegramId,
-                'existing_user_id' => $existingUser->id,
-            ]);
-            throw new \Exception('Пользователь уже зарегистрирован.');
-        }
-
-        \Log::info($data);
 
         $user = new User([
             'telegram_user_id' => $hashedTelegramId,
@@ -42,6 +27,7 @@ class UserRepository
             'phone' => $data['phone'],
             'birthdate' => $data['birthdate'],
         ]);
+
 
         $fillable = $user->getFillable();
         if (!in_array('first_name', $fillable) || !in_array('last_name', $fillable) ||
@@ -52,10 +38,8 @@ class UserRepository
         $user->save();
 
         \Log::info('User saved', [
-            'telegram_id' => $telegramId,
             'user_id' => $user->id,
         ]);
-
         return $user;
     }
 }
