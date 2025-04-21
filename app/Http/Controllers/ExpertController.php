@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Expert\StoreExpertRequest;
 use App\Models\ExpertCategory;
 use App\Repositories\ExpertRepository;
 use App\Services\ExpertService;
 use Illuminate\Http\Request;
+use Illuminate\Session\Store;
 use Illuminate\Support\Facades\DB;
 
 class ExpertController extends Controller
@@ -30,43 +32,40 @@ class ExpertController extends Controller
         return response()->json($experts);
     }
 
-    public function store(Request $request)
+    public function getParticularExpert($expertId)
     {
-        $expert = $this->expertService->createExpert();
-        if ($expert !== null) {
-            \Log::warning('Expert already created');
+        $expert = $this->expertRepository->getExpertById($expertId);
+        if ($expert == null) {
+            \Log::warning("Expert not found with id {$expertId}");
             return response()->json([
-                'message' => 'Expert already created',
-                'expert' => $expert
+                'message' => 'Expert not found with id ' . $expertId
             ]);
         }
-        
-        $request->validate([
-           'first_name' => 'required|string',
-           'last_name' => 'required|string',
-           'biography' => 'required|string',
-           'photo' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
-           'experience' => 'required|string',
-           'education' => 'required|string',
-        ]);
+        return response()->json($expert);
+    }
 
-        $data = [
-            'user_id' => auth()->id(),
-            'first_name' => $request->input('first_name'),
-            'last_name' => $request->input('last_name'),
-            'biography' => $request->input('biography'),
-            'experience' => $request->input('experience'),
-            'education' => $request->input('education'),
-        ];
+    public function store(StoreExpertRequest $request)
+    {
+        \Log::info('Store method');
+        $expert = $this->expertService->userAlreadyHasExpert();
+        if ($expert === true) {
+            \Log::warning('Expert already created');
+            return response()->json([
+                'message' => 'Expert already created'
+            ], 409);
+        }
+
+        $data = $request->validated();
+        $data['user_id'] = auth()->id();
+
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('experts', 'public');
+            $data['photo'] = '/storage/' . $path;
+        }
 
         DB::beginTransaction();
 
         try {
-            if ($request->hasFile('photo')) {
-                $path = $request->file('photo')->store('experts', 'public');
-                $data['photo'] = '/storage/' . $path;
-            }
-
             $expert = $this->expertRepository->create($data);
             DB::commit();
 
@@ -74,52 +73,56 @@ class ExpertController extends Controller
                 'message' => 'Эксперт успешно создан',
                 'expert' => $expert
             ], 201);
-        } catch (\Exception $exception) {
+        } catch (\Throwable $e) {
             DB::rollBack();
+            \Log::error('Ошибка при создании эксперта: ' . $e->getMessage());
+
             return response()->json([
                 'message' => 'Ошибка при создании пользователя',
-                'error' => $exception->getMessage()
+                'error' => $e->getMessage()
             ],  500);
         }
     }
 
     public function update(Request $request, int $expertId)
     {
-        $data = $request->validate([
-            'first_name' => 'nullable|string',
-            'last_name' => 'nullable|string',
-            'biography' => 'nullable|string',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'experience' => 'nullable|string',
-            'education' => 'nullable|string',
-        ]);
+        $data = $request->validated();
+
+        if ($request->hasFile('photo')) {
+            $oldExpert = $this->expertRepository->getExpertById($expertId);
+
+            if ($oldExpert && $oldExpert->photo) {
+                \Storage::dist('public')->delete(str_replace('/storage', '', $oldExpert->photo));
+            }
+
+            $data['photo'] = '/storage/' . $request->file('photo')->store('experts', 'public');
+        }
 
         DB::beginTransaction();
 
         try {
-            if ($request->hasFile('photo')) {
-                $oldExpert = $this->expertRepository->getExpertById($expertId);
-                if ($oldExpert && $oldExpert->photo && file_exists(public_path($oldExpert->photo))) {
-                    unlink(public_path($oldExpert->photo));
-                }
+            $expert = $this->expertService->updateExpert($data, $expertId);
 
-                $path = $request->file('photo')->store('experts', 'public');
-                $data['photo'] = '/storage/' . $path;
+            if (!$expert) {
+                DB::rollBack();
+                return response()->json([
+                    'message' => 'Не найден эксперт с id = ' . $expertId . ' или доступ запрещен.'
+                ]);
             }
 
-            $expert = $this->expertService->updateExpert($data, $expertId);
             DB::commit();
 
             return response()->json([
                 'message' => 'Экспер успешно обновлен',
                 'expert' => $expert
             ], 200);
-        } catch (\Exception $exception) {
+        } catch (\Throwable $e) {
             DB::rollBack();
-            \Log::error('Updating expert error: ' . $exception->getMessage());
+            \Log::error('Ошибка обновления эксперта: ' . $e->getMessage());
+
             return response()->json([
                 'message' => 'Не удалось обновить данные эксперта',
-                'error' => $exception->getMessage()
+                'error' => $e->getMessage()
             ], 500);
         }
     }

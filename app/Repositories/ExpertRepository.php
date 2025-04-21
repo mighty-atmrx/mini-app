@@ -15,7 +15,7 @@ class ExpertRepository
 
     public function getExpertById(int $expertId): ?Expert
     {
-        return $this->model->findOrFail($expertId);
+        return $this->model->find($expertId);
     }
 
     public function getExpertByUserId(int $userId): ?Expert

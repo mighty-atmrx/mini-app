@@ -17,8 +17,11 @@ class verifyJWT
      */
     public function handle(Request $request, Closure $next): Response
     {
+        \Log::info('JWT middleware passed', ['user' => auth()->user()]);
+
         try {
             $user = JWTAuth::parseToken()->authenticate();
+            auth()->setUser($user);
             \Log::info('JWT verified: ', [
                 'user_id' => $user ? $user->id : null,
                 'token' => $request->bearerToken()

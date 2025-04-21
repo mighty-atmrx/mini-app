@@ -13,15 +13,16 @@ class ExpertService
         $this->expertRepository = $expertRepository;
     }
 
-    public function createExpert()
+    public function userAlreadyHasExpert()
     {
         $expert = $this->expertRepository->getExpertByUserId(auth()->id());
+
         if ($expert) {
             \Log::info('Expert already created');
-            return $expert;
+            return true;
         }
-        \Log::info('Expert not found. You can create an expert');
-        return null;
+
+        return false;
     }
 
     public function updateExpert(array $data, int $expertId)
@@ -29,7 +30,7 @@ class ExpertService
         $expert = $this->expertRepository->getExpertById($expertId);
         if (!$expert || $expert->user_id !== auth()->id()) {
             \Log::error('Expert not found or access denied');
-            return null;
+            throw new \Exception('Expert not found or access denied');
         }
         $expert = $this->expertRepository->update($data, $expertId);
         return $expert;

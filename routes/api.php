@@ -23,6 +23,7 @@ Route::middleware(['jwt.verify'])->group(function () {
         return $request->user();
     });
     Route::get('/users/{telegram_id}', [UserController::class, 'show']);
+
     Route::post('/experts', [ExpertController::class, 'store'])->name('expert.store');
     Route::patch('/experts/{expertId}', [ExpertController::class, 'update'])->name('expert.update');
 });
@@ -32,5 +33,6 @@ Route::post('/telegram/webhook', [Handler::class, 'handleUserResponse']);
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);
 
 Route::get('/experts', [ExpertController::class, 'index'])->name('expert.index');
+Route::get('/experts/{expertId}', [ExpertController::class, 'getParticularExpert'])->name('expert.get_particular_expert');
 
 Route::post('/users', [UserController::class, 'store'])->name('user.store');
