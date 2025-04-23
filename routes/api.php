@@ -21,5 +21,5 @@ Route::middleware(['jwt.verify'])->group(function () {
     });
 });
 
-Route::post('/telegram/webhook', [Handler::class, 'handleUserResponse']);
+Route::post('/telegram/webhook', [Handler::class, 'handle']);
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);
