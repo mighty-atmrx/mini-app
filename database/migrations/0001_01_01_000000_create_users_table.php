@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('last_name')->nullable();
             $table->date('birthdate');
             $table->string('phone');
+            $table->enum('role', ['user', 'expert', 'admin'])->default('user');
             $table->timestamps();
         });
 
