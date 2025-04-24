@@ -29,12 +29,13 @@ class Handler extends WebhookHandler
 
     public function start(): void
     {
+        \Log::info('1111');
+        \Log::info('Start method triggered', ['telegram_id' => $this->chat->chat_id]);
+
         if (!$this->chat) {
             \Log::error('Chat not initialized in start');
             return;
         }
-
-        \Log::info('Start method triggered', ['telegram_id' => $this->chat->chat_id]);
 
         $imageUrl = config('telegram.image_url', 'https://bluejay-pretty-clearly.ngrok-free.app/expert.jpg');
 

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "54da75b0db28b974ee59caa7f0197cf8",
+    "content-hash": "2f689c7d495f224500073b3fd042dca6",
     "packages": [
         {
             "name": "brick/math",
@@ -137,16 +137,16 @@
         },
         {
             "name": "defstudio/telegraph",
-            "version": "v1.58.0",
+            "version": "v1.59.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/defstudio/telegraph.git",
-                "reference": "af251374e5f089f786eb04260b46c2555dc01ad4"
+                "reference": "ca20a0f76c7c972db0ea8dec66f9187854c787a3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/defstudio/telegraph/zipball/af251374e5f089f786eb04260b46c2555dc01ad4",
-                "reference": "af251374e5f089f786eb04260b46c2555dc01ad4",
+                "url": "https://api.github.com/repos/defstudio/telegraph/zipball/ca20a0f76c7c972db0ea8dec66f9187854c787a3",
+                "reference": "ca20a0f76c7c972db0ea8dec66f9187854c787a3",
                 "shasum": ""
             },
             "require": {
@@ -211,7 +211,7 @@
             ],
             "support": {
                 "issues": "https://github.com/defstudio/telegraph/issues",
-                "source": "https://github.com/defstudio/telegraph/tree/v1.58.0"
+                "source": "https://github.com/defstudio/telegraph/tree/v1.59.0"
             },
             "funding": [
                 {
@@ -227,7 +227,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-04-05T11:00:51+00:00"
+            "time": "2025-04-22T14:43:57+00:00"
         },
         {
             "name": "dflydev/dot-access-data",
