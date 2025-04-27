@@ -46,10 +46,13 @@ services:
             POSTGRES_PASSWORD: ${DB_PASSWORD}
             POSTGRES_DB: ${DB_DATABASE}
         volumes:
-            -   db-data:/var/lib/postgresql/data
-            - ./pg_hba.conf:/etc/postgresql/data/pg_hba.conf
+            - db-data:/var/lib/postgresql/data
+            - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
         networks:
             - app-network
+        ports:
+            - "5432:5432"
+        command: postgres -c hba_file=/etc/postgresql/pg_hba.conf
 
 networks:
     app-network:
