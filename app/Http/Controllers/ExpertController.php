@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Expert\StoreExpertRequest;
+use App\Http\Requests\Expert\UpdateExpertRequest;
 use App\Models\ExpertCategory;
 use App\Repositories\ExpertRepository;
 use App\Services\ExpertService;
@@ -84,7 +85,7 @@ class ExpertController extends Controller
         }
     }
 
-    public function update(Request $request, int $expertId)
+    public function update(UpdateExpertRequest $request, int $expertId)
     {
         $data = $request->validated();
 

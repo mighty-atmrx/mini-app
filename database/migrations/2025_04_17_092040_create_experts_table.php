@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('biography');
             $table->string('photo');
             $table->text('experience');
-            $table->text('Education (certificates, courses)');
+            $table->text('education');
             $table->timestamps();
         });
     }

@@ -34,7 +34,7 @@ class UserController extends Controller
             'phone' => 'nullable|string',
         ]);
 
-        if (!array_key_exists('last_name', $data)) {
+        if ($data['last_name'] === null) {
             $data['last_name'] = '';
         }
 

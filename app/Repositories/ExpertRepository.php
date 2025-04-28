@@ -15,12 +15,12 @@ class ExpertRepository
 
     public function getExpertById(int $expertId): ?Expert
     {
-        return $this->model->find($expertId);
+        return $this->model->with('categories')->find($expertId);
     }
 
     public function getExpertByUserId(int $userId): ?Expert
     {
-        return $this->model->where('user_id', $userId)->first();
+        return $this->model->where('user_id', $userId)->with('categories')->first();
     }
 
     public function getAllExperts()
