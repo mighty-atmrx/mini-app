@@ -18,9 +18,15 @@ Route::middleware(['jwt.verify'])->group(function () {
             'auth_error' => $user ? null : 'No user Authenticated'
         ]);
         if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['error' => 'Unauthorized', 'code' => 'no_user'], 401);
         }
-        return $request->user();
+        return response()->json([
+            'id' => $user->id,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name ?? '',
+            'phone' => $user->phone ?? 'Не указан',
+            'birthdate' => $user->birthdate ?? 'Не указана',
+        ]);
     });
     Route::get('/users/{telegram_id}', [UserController::class, 'show']);
 

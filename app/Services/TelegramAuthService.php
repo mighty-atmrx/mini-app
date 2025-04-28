@@ -17,11 +17,22 @@ class TelegramAuthService
     public function verifyInitData(string $initData): ?array
     {
         \Log::info('Raw initData', ['initData' => $initData]);
+
+        if (empty($initData)) {
+            \Log::error('Init data is empty');
+            return null;
+        }
+
         parse_str($initData, $params);
         \Log::info('Parsed initData params', ['params' => $params]);
 
         if (!isset($params['hash'])) {
             \Log::error('Hash missing in initData');
+            return null;
+        }
+
+        if (!isset($params['user'])) {
+            \Log::error('User missing in initData');
             return null;
         }
 
@@ -40,6 +51,8 @@ class TelegramAuthService
             \Log::error('Bot token missing');
             return null;
         }
+        \Log::info('Bot token', ['token' => substr($botToken, 0, 10) . '...']);
+
         $secretKey = hash_hmac('sha256', $botToken, 'WebAppData', true);
         $computedHash = bin2hex(hash_hmac('sha256', $dataCheckString, $secretKey, true));
         \Log::info('Signature check', ['computedHash' => $computedHash, 'receivedHash' => $params['hash']]);
@@ -51,6 +64,8 @@ class TelegramAuthService
 
         \Log::info('Raw user param', ['user' => $params['user']]);
         $userData = json_decode($params['user'], true);
+        \Log::info('Decoded user data', ['userData' => $userData, 'json_error' => json_last_error_msg()]);
+
         if (json_last_error() !== JSON_ERROR_NONE || !isset($userData['id'])) {
             \Log::error('Invalid user data');
             return null;

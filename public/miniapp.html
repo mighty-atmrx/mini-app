@@ -2,80 +2,169 @@
     <meta charset="UTF-8">
     <title>Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        .error {
+            color: red;
+        }
+    </style>
 </head>
 <body>
 <div id="user-info"></div>
+<button id="retry-auth" style="display: none;" onclick="initApp()">Повторить авторизацию</button>
 <script>
+    console.log('Script loaded');
     Telegram.WebApp.ready();
+    console.log('Telegram.WebApp.ready called');
     Telegram.WebApp.expand();
+    console.log('Telegram.WebApp.expand called');
 
     const API_URL = 'https://bluejay-pretty-clearly.ngrok-free.app/api';
     const BOT_URL = 'https://t.me/ExpertMiniAppBot';
 
-    async function authenticate() {
-        try {
-            const initData = Telegram.WebApp.initData;
-            console.log('Sending initData:', initData);
-            const response = await fetch(`${API_URL}/auth/telegram`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ initData })
-            });
-            console.log('Auth response status:', response.status);
-            if (!response.ok) {
-                throw new Error(`Auth failed: ${response.status}`);
-            }
-            const data = await response.json();
-            console.log('Auth response:', data);
-            if (data.token) {
-                localStorage.setItem('jwt_token', data.token);
-                fetchUser();
-            } else {
-                throw new Error('No token received');
-            }
-        } catch (error) {
-            console.error('Auth error:', error.message);
-            showError('Ошибка авторизации. Попробуй снова.');
+    async function authenticateWithRetry(maxRetries = 1, delay = 1000) {
+        const initData = Telegram.WebApp.initData;
+        console.log('initData:', initData);
+
+        if (!initData) {
+            console.error('No initData available');
+            showError('Ошибка: initData недоступно. Открой через бота.');
             Telegram.WebApp.openTelegramLink(BOT_URL);
+            return false;
         }
+
+        let retries = 0;
+
+        while (retries <= maxRetries) {
+            try {
+                console.log(`Authentication attempt ${retries + 1}/${maxRetries + 1}`);
+                const response = await fetch(`${API_URL}/auth/telegram`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ initData })
+                });
+
+                console.log('Auth response status:', response.status);
+                const data = await response.json();
+                console.log('Auth response:', data);
+
+                if (response.ok && data.token) {
+                    localStorage.setItem('jwt_token', data.token);
+                    console.log('Authentication successful, token saved:', data.token);
+                    return true;
+                } else {
+                    console.error('Authentication failed:', data.error || 'No token received', 'Code:', data.code);
+                    if (data.code === 'missing_init_data') {
+                        console.error('Missing initData, aborting retries.');
+                        showError('Ошибка: initData недоступно. Открой через бота.');
+                        Telegram.WebApp.openTelegramLink(BOT_URL);
+                        return false;
+                    }
+                    throw new Error(data.error || 'No token received');
+                }
+            } catch (error) {
+                console.error('Auth error:', error.message);
+                retries++;
+
+                if (retries <= maxRetries) {
+                    console.log(`Retrying authentication in ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } else {
+                    console.error('Max retries reached. Authentication failed.');
+                    showError('Ошибка авторизации после повторных попыток.');
+                    document.getElementById('retry-auth').style.display = 'block';
+                    return false;
+                }
+            }
+        }
+
+        return false;
     }
 
-    async function fetchUser() {
+    async function fetchUserWithRetry(maxRetries = 1, delay = 1000) {
         const token = localStorage.getItem('jwt_token');
         if (!token) {
             console.error('No token found');
             showError('Требуется авторизация.');
-            authenticate();
+            await authenticateWithRetry();
             return;
         }
-        try {
-            console.log('Fetching user with token:', token.substring(0, 20) + '...');
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Задержка
-            const response = await fetch(`${API_URL}/user`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
+
+        let retries = 0;
+
+        while (retries <= maxRetries) {
+            try {
+                console.log('Fetching user with token:', token);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                const response = await fetch(`${API_URL}/user`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                console.log('GET /api/user status:', response.status);
+                const data = await response.json();
+                console.log('GET /api/user response:', data);
+
+                if (response.ok) {
+                    console.log('User data:', data);
+                    displayUser(data);
+                    return;
+                } else {
+                    console.error('Fetch user failed:', data.error || 'Unknown error', 'Code:', data.code, 'Details:', data.details);
+                    if (response.status === 401 || data.code === 'invalid_token' || data.code === 'no_user') {
+                        localStorage.removeItem('jwt_token');
+                        showError('Сессия истекла. Повтори авторизацию.');
+                        await authenticateWithRetry();
+                        return;
+                    }
+                    throw new Error(data.error || `HTTP error: ${response.status}`);
                 }
-            });
-            console.log('GET /api/user status:', response.status);
-            if (!response.ok) {
-                localStorage.removeItem('jwt_token');
-                throw new Error(`HTTP error: ${response.status}`);
+            } catch (error) {
+                console.error('Fetch user error:', error.message);
+                retries++;
+
+                if (retries <= maxRetries) {
+                    console.log(`Retrying fetch user in ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } else {
+                    console.error('Max retries reached for fetch user.');
+                    showError('Ошибка доступа. Повтори авторизацию.');
+                    document.getElementById('retry-auth').style.display = 'block';
+                    return;
+                }
             }
-            const user = await response.json();
-            console.log('User data:', user);
-            displayUser(user);
-        } catch (error) {
-            console.error('Fetch user error:', error.message);
-            showError('Ошибка доступа. Повтори авторизацию.');
-            localStorage.removeItem('jwt_token');
-            authenticate();
+        }
+    }
+
+    async function initApp() {
+        console.log('initApp started');
+        console.log('initData:', Telegram.WebApp.initData);
+        if (!Telegram.WebApp.initData) {
+            console.error('No initData available');
+            showError('Ошибка: initData недоступно. Открой через бота.');
+            Telegram.WebApp.openTelegramLink(BOT_URL);
+            return;
+        }
+
+        if (localStorage.getItem('jwt_token')) {
+            console.log('Token found in localStorage, fetching user');
+            await fetchUserWithRetry();
+        } else {
+            console.log('No token found, authenticating');
+            const success = await authenticateWithRetry();
+            if (success) {
+                await fetchUserWithRetry();
+            }
         }
     }
 
     Telegram.WebApp.ready();
-    authenticate();
+    setTimeout(() => {
+        console.log('Starting initApp after delay');
+        initApp();
+    }, 100);
 
     function displayUser(user) {
         const userInfo = document.getElementById('user-info');
@@ -85,6 +174,7 @@
                 <p><strong>Телефон:</strong> ${user.phone}</p>
                 <p><strong>Дата рождения:</strong> ${formatDate(user.birthdate)}</p>
             `;
+        document.getElementById('retry-auth').style.display = 'none';
     }
 
     function formatDate(dateStr) {
@@ -107,19 +197,5 @@
         showMessage('Вы вышли.');
         document.getElementById('user-info').innerHTML = '';
     }
-
-    Telegram.WebApp.ready();
-    setTimeout(() => {
-        console.log('initData:', Telegram.WebApp.initData);
-        if (!Telegram.WebApp.initData) {
-            showError('Ошибка: initData недоступно. Открой через бота.');
-            return;
-        }
-        if (localStorage.getItem('jwt_token')) {
-            fetchUser();
-        } else {
-            authenticate();
-        }
-    }, 100);
 </script>
 </body>

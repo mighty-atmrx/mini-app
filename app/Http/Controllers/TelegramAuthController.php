@@ -25,6 +25,12 @@ class TelegramAuthController extends Controller
         \Log::info('Auth request received', ['input' => $request->all()]);
 
         try {
+            $initData = $request->input('initData');
+            if (!$initData) {
+                \Log::error('No initData provided');
+                return response()->json(['error' => 'No initData provided'], 400);
+            }
+
             $userData = $this->telegramAuthService->verifyInitData($request->input('initData'));
             if (!$userData) {
                 \Log::error('Invalid userData');
@@ -32,8 +38,14 @@ class TelegramAuthController extends Controller
             }
 
             $telegramId = (string)$userData['id'];
+            if (!$telegramId) {
+                \Log::error('No telegramId in userData', ['userData' => $userData]);
+                return response()->json(['error' => 'No telegramId in userData'], 401);
+            }
+
             $hashedTelegramId = hash('sha256', $telegramId);
             \Log::info('Hashed telegramId', ['telegram_id' => $telegramId, 'hashed_telegram_id' => $hashedTelegramId]);
+
             $user = $this->userRepository->findByTelegramId($hashedTelegramId);
             if (!$user) {
                 \Log::error('User not found');

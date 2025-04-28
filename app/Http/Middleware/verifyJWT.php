@@ -17,10 +17,19 @@ class verifyJWT
      */
     public function handle(Request $request, Closure $next): Response
     {
-        \Log::info('JWT middleware passed', ['user' => auth()->user()]);
-
         try {
+            $token = $request->bearerToken();
+            if (!$token) {
+                \Log::error('No token provided in request');
+                return response()->json(['error' => 'Token not provided', 'code' => 'missing_token'], 401);
+            }
+
             $user = JWTAuth::parseToken()->authenticate();
+            if (!$user) {
+                \Log::error('User not found for token', ['token' => $token]);
+                return response()->json(['error' => 'User not found', 'code' => 'user_not_found'], 401);
+            }
+
             auth()->setUser($user);
             \Log::info('JWT verified: ', [
                 'user_id' => $user ? $user->id : null,
@@ -31,7 +40,11 @@ class verifyJWT
                 'error' => $e->getMessage(),
                 'token' => $request->bearerToken(),
             ]);
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json([
+                'error' => 'Unauthorized',
+                'code' => $e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException ? 'invalid_token' : 'jwt_error',
+                'details' => $e->getMessage()
+            ], 401);
         }
         return $next($request);
     }
