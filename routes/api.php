@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ExpertController;
 use App\Http\Controllers\TelegramAuthController;
 use App\Http\Controllers\UserController;
@@ -32,6 +33,8 @@ Route::middleware(['jwt.verify'])->group(function () {
 
     Route::post('/experts', [ExpertController::class, 'store'])->name('expert.store');
     Route::patch('/experts/{expertId}', [ExpertController::class, 'update'])->name('expert.update');
+
+    Route::post('/services', [CourseController::class, 'store'])->middleware('ensure.expert')->name('course.store');
 });
 
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle']);
@@ -41,5 +44,9 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('category.
 
 Route::get('/experts', [ExpertController::class, 'index'])->name('expert.index');
 Route::get('/experts/{expertId}', [ExpertController::class, 'getParticularExpert'])->name('expert.get_particular_expert');
+Route::get('/experts/{expertId}/services', [CourseController::class, 'getExpertCourses'])->name('course.get_expert_courses');
 
 Route::post('/users', [UserController::class, 'store'])->name('user.store');
+
+Route::get('/services', [CourseController::class, 'index'])->name('course.index');
+

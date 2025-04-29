@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Expert\StoreExpertRequest;
 use App\Models\ExpertCategory;
 use App\Repositories\ExpertRepository;
+use App\Repositories\UserRepository;
 use App\Services\ExpertService;
 use Illuminate\Http\Request;
 use Illuminate\Session\Store;
@@ -15,15 +16,18 @@ class ExpertController extends Controller
     protected $expertRepository;
     protected $expertCategory;
     protected $expertService;
+    protected $userRepository;
 
     public function __construct(
         ExpertRepository $expertRepository,
         ExpertCategory $expertCategory,
-        ExpertService $expertService
+        ExpertService $expertService,
+        UserRepository $userRepository,
     ){
         $this->expertRepository = $expertRepository;
         $this->expertCategory = $expertCategory;
         $this->expertService = $expertService;
+        $this->userRepository = $userRepository;
     }
 
     public function index()
@@ -67,6 +71,7 @@ class ExpertController extends Controller
 
         try {
             $expert = $this->expertRepository->create($data);
+            $this->userRepository->updateUserRole('expert', auth()->id());
             DB::commit();
 
             return response()->json([
