@@ -18,22 +18,35 @@ class verifyJWT
     public function handle(Request $request, Closure $next): Response
     {
         try {
-            $token = $request->bearerToken();
+            $token = $request->cookie('access_token');
             if (!$token) {
                 \Log::error('No token provided in request');
-                return response()->json(['error' => 'Token not provided', 'code' => 'missing_token'], 401);
+                return response()->json([
+                    'error' => 'Token not provided',
+                    'code' => 'missing_token'
+                ], 401);
             }
 
-            $user = JWTAuth::parseToken()->authenticate();
+            JWTAuth::setToken($token);
+
+            $user = JWTAuth::authenticate();
             if (!$user) {
                 \Log::error('User not found for token', ['token' => $token]);
-                return response()->json(['error' => 'User not found', 'code' => 'user_not_found'], 401);
+                return response()->json([
+                    'error' => 'User not found',
+                    'code' => 'user_not_found'
+                ], 401);
             }
 
             auth()->setUser($user);
+
+            $request->setUserResolver(function () use ($user) {
+                return $user;
+            });
+
             \Log::info('JWT verified: ', [
                 'user_id' => $user ? $user->id : null,
-                'token' => $request->bearerToken()
+                'token' => $request->cookie()['access_token'] ?? null,
             ]);
         } catch (JWTException $e) {
             \Log::error('JWT error: ', [

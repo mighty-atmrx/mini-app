@@ -36,6 +36,7 @@ Route::middleware(['jwt.verify'])->group(function () {
 
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle']);
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);
+Route::post('auth/telegram/refresh', [TelegramAuthController::class, 'refresh']);
 
 Route::get('/categories', [CategoryController::class, 'index'])->name('category.index');
 

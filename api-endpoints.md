@@ -423,3 +423,28 @@
       "error": "Invalid webhook data"
   }
   ```
+### Аутентификация
+
+### POST /api/auth/telegram/refresh
+- **Описание**: Обновление access token с помощью refresh token.
+- **Параметры**:
+  - Нет (токен передаётся через куки refresh_token).
+- **Авторизация**: Не требуется.
+- **Пример запроса**:
+```json
+  {}
+```
+- **Пример ответа (успех)**:
+```json
+    {
+        "message": "Token refreshed",
+        "expires_in": 900
+    }
+```
+- **Пример ответа (ошибка)**:
+```json
+    {
+        "error": "Refresh token expired",
+        "code": "refresh_token_expired"
+    }
+```
