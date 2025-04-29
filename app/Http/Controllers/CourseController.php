@@ -26,14 +26,30 @@ class CourseController extends Controller
 
     public function index()
     {
-        $courses = $this->courseRepository->getAllCourses();
-        return response()->json($courses);
+        try {
+            $courses = $this->courseRepository->getAllCourses();
+            return response()->json($courses);
+        } catch (\Exception $e) {
+            \Log::error('Courses error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function getExpertCourses(int $expertId)
     {
-        $courses = $this->courseRepository->getExpertCourses($expertId);
-        return response()->json($courses);
+        try {
+            $courses = $this->courseRepository->getExpertCourses($expertId);
+            return response()->json($courses);
+        } catch (\Exception $e) {
+            \Log::error('Courses error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function store(Request $request)
