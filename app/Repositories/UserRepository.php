@@ -42,4 +42,11 @@ class UserRepository
         ]);
         return $user;
     }
+
+    public function updateUserRole(string $role, int $userId)
+    {
+        $user = User::find($userId);
+        $user->role = $role;
+        $user->save();
+    }
 }
