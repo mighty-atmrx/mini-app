@@ -64,12 +64,19 @@ class CourseController extends Controller
         $data['expert_id'] = $request->input('expert_id');
 
         DB::beginTransaction();
+
         try {
             $course = $this->courseRepository->create($data);
             if (!$course) {
                 throw new \Exception('Failed to create course');
             }
+
             DB::commit();
+
+            \Log::info('Course added successfully', [
+                'course' => $course
+            ]);
+
             return response()->json([
                 'message' => 'Course added successfully',
                 'course' => $course
@@ -82,6 +89,43 @@ class CourseController extends Controller
             ]);
             return response()->json([
                 'message' => 'Course not created',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateCourse(Request $request, int $courseId)
+    {
+        $data = $request->validate([
+           'title' => 'nullable|string',
+           'description' => 'nullable|string',
+           'price' => 'nullable|numeric',
+           'category_id' => 'nullable|exists:categories,id',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $course = $this->courseRepository->update($data, $courseId);
+            if (!$course) {
+                throw new \Exception('Failed to update course');
+            }
+
+            DB::commit();
+
+            \Log::info('Course updated successfully');
+
+            return response()->json([
+                'message' => 'Course updated successfully',
+                'course' => $course
+            ]);
+        } catch (\Exception $e) {
+            \Log::info('Course update error', [
+                'course_id' => $courseId,
+                'error' => $e->getMessage()
+            ]);
+            return response()->json([
+                'message' => 'Course not updated',
                 'error' => $e->getMessage()
             ], 500);
         }

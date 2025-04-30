@@ -24,9 +24,21 @@ class CourseRepository
         return $this->model->where('expert_id', $expertId)->with('category')->get();
     }
 
+    public function getCourseById(int $courseId): ?Course
+    {
+        return $this->model->find($courseId);
+    }
+
     public function create(array $data): ?Course
     {
-        $course = $this->model->create($data);
+        return $this->model->create($data);
+    }
+
+    public function update(array $data, int $courseId): ?Course
+    {
+        $course = $this->getCourseById($courseId);
+        $course->update($data);
+        $course->save();
         return $course;
     }
 }

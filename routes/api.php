@@ -35,6 +35,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::patch('/experts/{expertId}', [ExpertController::class, 'update'])->name('expert.update');
 
     Route::post('/services', [CourseController::class, 'store'])->middleware('ensure.expert')->name('course.store');
+    Route::patch('/services/{serviceId}', [CourseController::class, 'updateCourse'])->middleware('ensure.expert')->name('course.update');
 });
 
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle']);
