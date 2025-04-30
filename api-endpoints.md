@@ -581,3 +581,71 @@
     "code": "missing_token"
 }
 ```
+
+### PATCH /api/services/{serviceId}
+- **Описание**: Создает курс.
+- **Параметры**: 
+    - `title` (string, nullable): Название курса.
+    - `description` (text, nullable): Описание курса.
+    - `price` (float, nullable): Цена курса.
+    - `category_id` (integer, nullable): ID категории.
+    - `serviceId` (integer, required) ID услуги
+- **Авторизация**: Проверка на статус эксперта и используется политика проверки принадлежности услуги эксперту.
+- **Пример запроса**:
+```json
+{
+    "title": "мой первый курс",
+    "description": "описание первого курса",
+    "price": 4499
+}
+```
+- **Пример ответа (успех)**:
+```json
+[
+    {
+        "message": "Service updated successfully",
+        "service": {
+            "id": 1,
+            "expert_id": 3,
+            "title": "мой первый курс",
+            "description": "описание первого курса",
+            "price": "4499",
+            "category_id": 1,
+            "created_at": "2025-04-29T17:40:51.000000Z",
+            "updated_at": "2025-04-30T19:49:09.000000Z"
+        }
+    }
+]
+```
+- **Пример ответа (ошибка)**:
+```json
+{
+    "message": "Service not updated",
+    "error": "Сообщение с информацией об ошибке"
+}
+```
+
+### DELETE /api/services/{serviceId}
+- **Описание**: Создает курс.
+- **Параметры**:
+    - `serviceId` (integer, required) ID услуги
+- **Авторизация**: Проверка на статус эксперта и используется политика проверки принадлежности услуги эксперту.
+- **Пример запроса**:
+```json
+{}
+```
+- **Пример ответа (успех)**:
+```json
+[
+    {
+        "message": "Service deleted successfully"
+    }
+]
+```
+- **Пример ответа (ошибка)**:
+```json
+{
+    "message": "Service not deleted",
+    "error": "Сообщение с информацией об ошибке"
+}
+```

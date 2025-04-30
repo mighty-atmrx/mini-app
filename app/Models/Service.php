@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Course extends Model
+class Service extends Model
 {
     protected $table = 'courses';
     protected $fillable = ['expert_id', 'title', 'description', 'price', 'category_id',];
