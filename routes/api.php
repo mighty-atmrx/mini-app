@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CourseController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ExpertController;
 use App\Http\Controllers\TelegramAuthController;
 use App\Http\Controllers\UserController;
@@ -14,7 +14,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::get('/user', function (Request $request) {
         $user = $request->user();
         \Log::info('GET /api/user attempt', [
-            'user' => $user ? $user->toArray() : null,
+            'user_id' => $user ? $user->id : null,
             'token' => $request->bearerToken(),
             'auth_error' => $user ? null : 'No user Authenticated'
         ]);
@@ -31,24 +31,22 @@ Route::middleware(['jwt.verify'])->group(function () {
     });
     Route::get('/users/{telegram_id}', [UserController::class, 'show']);
 
+    Route::get('/categories', [CategoryController::class, 'index'])->name('category.index');
+
+    Route::get('/experts', [ExpertController::class, 'index'])->name('expert.index');
+    Route::get('/experts/{expertId}', [ExpertController::class, 'getParticularExpert'])->name('expert.get_particular_expert');
+    Route::get('/experts/{expertId}/services', [ServiceController::class, 'getExpertServices'])->name('service.get_expert_services');
     Route::post('/experts', [ExpertController::class, 'store'])->name('expert.store');
     Route::patch('/experts/{expertId}', [ExpertController::class, 'update'])->name('expert.update');
 
-    Route::post('/services', [CourseController::class, 'store'])->middleware('ensure.expert')->name('course.store');
-    Route::patch('/services/{serviceId}', [CourseController::class, 'updateCourse'])->middleware('ensure.expert')->name('course.update');
+    Route::get('/services', [ServiceController::class, 'index'])->name('service.index');
+    Route::post('/services', [ServiceController::class, 'store'])->middleware('ensure.expert')->name('service.store');
+    Route::patch('/services/{serviceId}', [ServiceController::class, 'updateService'])->middleware('ensure.expert')->name('service.update');
+    Route::delete('/services/{serviceId}', [ServiceController::class, 'deleteService'])->middleware('ensure.expert')->name('service.delete');
 });
 
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle']);
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);
 Route::post('auth/telegram/refresh', [TelegramAuthController::class, 'refresh']);
 
-Route::get('/categories', [CategoryController::class, 'index'])->name('category.index');
-
-Route::get('/experts', [ExpertController::class, 'index'])->name('expert.index');
-Route::get('/experts/{expertId}', [ExpertController::class, 'getParticularExpert'])->name('expert.get_particular_expert');
-Route::get('/experts/{expertId}/services', [CourseController::class, 'getExpertCourses'])->name('course.get_expert_courses');
-
 Route::post('/users', [UserController::class, 'store'])->name('user.store');
-
-Route::get('/services', [CourseController::class, 'index'])->name('course.index');
-

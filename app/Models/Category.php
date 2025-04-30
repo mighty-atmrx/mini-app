@@ -18,8 +18,8 @@ class Category extends Model
         return $this->belongsToMany(Expert::class, 'expert_categories', 'category_id', 'expert_id');
     }
 
-    public function courses()
+    public function services()
     {
-        return $this->belongsToMany(Course::class);
+        return $this->belongsToMany(Service::class);
     }
 }
