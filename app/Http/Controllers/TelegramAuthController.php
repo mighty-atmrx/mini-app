@@ -31,6 +31,7 @@ class TelegramAuthController extends Controller
                 \Log::error('No initData provided');
                 return response()->json(['error' => 'No initData provided'], 400);
             }
+            \Log::info('InitData', ['initData' => $initData]);
 
             $userData = $this->telegramAuthService->verifyInitData($request->input('initData'));
             if (!$userData) {

@@ -34,7 +34,6 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::get('/categories', [CategoryController::class, 'index'])->name('category.index');
 
     Route::get('/experts', [ExpertController::class, 'index'])->name('expert.index');
-    Route::get('/experts/{expertId}', [ExpertController::class, 'getParticularExpert'])->name('expert.get_particular_expert');
     Route::get('/experts/{expertId}/services', [ServiceController::class, 'getExpertServices'])->name('service.get_expert_services');
     Route::post('/experts', [ExpertController::class, 'store'])->name('expert.store');
     Route::patch('/experts/{expertId}', [ExpertController::class, 'update'])->name('expert.update');
@@ -44,6 +43,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::patch('/services/{serviceId}', [ServiceController::class, 'updateService'])->middleware('ensure.expert')->name('service.update');
     Route::delete('/services/{serviceId}', [ServiceController::class, 'deleteService'])->middleware('ensure.expert')->name('service.delete');
 });
+    Route::get('/experts/{expertId}', [ExpertController::class, 'getParticularExpert'])->name('expert.get_particular_expert');
 
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle']);
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);

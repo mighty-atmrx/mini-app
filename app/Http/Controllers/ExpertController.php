@@ -46,7 +46,13 @@ class ExpertController extends Controller
                 'message' => 'Expert not found with id ' . $expertId
             ]);
         }
-        return response()->json($expert);
+
+        $reviews = $expert->reviews()->with('user')->paginate(5);
+
+        return response()->json([
+            'expert' => $expert,
+            'reviews' => $reviews
+        ]);
     }
 
     public function store(StoreExpertRequest $request)

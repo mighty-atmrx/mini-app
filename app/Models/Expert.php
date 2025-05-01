@@ -26,4 +26,9 @@ class Expert extends Model
     {
         return $value ? url($value) : null;
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }

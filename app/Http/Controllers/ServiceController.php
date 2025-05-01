@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Service\StoreServiceRequest;
+use App\Http\Requests\Service\UpdateServiceRequest;
 use App\Http\Resources\ServiceResource;
+use App\Models\ExpertCategory;
 use App\Repositories\ServiceRepository;
 use App\Repositories\ExpertRepository;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -52,15 +55,10 @@ class ServiceController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(Request $request, StoreServiceRequest $storeRequest)
     {
         try {
-            $data = $request->validate([
-                'title' => 'required|string',
-                'description' => 'required|string',
-                'price' => 'required|numeric',
-                'category_id' => 'required|exists:categories,id',
-            ]);
+            $data = $storeRequest->validated();
 
             $expertId = $request->input('expert_id');
             if (!$expertId) {
@@ -74,9 +72,20 @@ class ServiceController extends Controller
                 throw new \Exception('Failed to create service');
             }
 
+            $expertCategory = ExpertCategory::where('expert_id', $expertId)
+                ->where('category_id', $service->category_id)
+                ->first();
+            if (!$expertCategory) {
+                $data = [
+                    'expert_id' => $expertId,
+                    'category_id' => $service->category_id
+                ];
+                ExpertCategory::create($data);
+            }
+
             DB::commit();
 
-            \Log::info('Service added successfully', ['servise' => $service->toArray()]);
+            \Log::info('Service added successfully', ['service' => $service->toArray()]);
 
             return response()->json([
                 'message' => 'Service added successfully',
@@ -100,8 +109,7 @@ class ServiceController extends Controller
         }
     }
 
-    public function updateService(Request $request, int $serviceId)
-    {
+    public function updateService(UpdateServiceRequest $updateRequest, int $serviceId){
         $service = $this->serviceRepository->getServiceById($serviceId);
         if (!$service) {
             return response()->json(['message' => 'Service not found',], 404);
@@ -109,12 +117,7 @@ class ServiceController extends Controller
 
         $this->authorize('update', $service);
 
-        $data = $request->validate([
-           'title' => 'nullable|string',
-           'description' => 'nullable|string',
-           'price' => 'nullable|numeric',
-           'category_id' => 'nullable|exists:categories,id',
-        ]);
+        $data = $updateRequest->validated();
 
         DB::beginTransaction();
 
@@ -122,6 +125,17 @@ class ServiceController extends Controller
             $service = $this->serviceRepository->update($data, $serviceId);
             if (!$service) {
                 throw new \Exception('Failed to update service');
+            }
+
+            $expertCategory = ExpertCategory::where('expert_id', $service->expert_id)
+                ->where('category_id', $service->category_id)
+                ->first();
+            if (!$expertCategory) {
+                $data = [
+                    'expert_id' => $service->expert_id,
+                    'category_id' => $service->category_id
+                ];
+                ExpertCategory::create($data);
             }
 
             DB::commit();
