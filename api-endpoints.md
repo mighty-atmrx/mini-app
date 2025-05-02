@@ -649,3 +649,67 @@
     "error": "Сообщение с информацией об ошибке"
 }
 ```
+
+### Эксперты в избранном
+### GET /api/favorites/experts
+- **Описание**: Создает курс.
+- **Параметры**:
+    - `serviceId` (integer, required) ID услуги
+- **Авторизация**: Проверка на статус эксперта и используется политика проверки принадлежности услуги эксперту.
+- **Пример запроса**:
+```/api/favorites/experts?experts_ids=1, 2```
+
+```В Params указывается ключ "experts_ids" и в значении перечисление через запятую (например: 1, 2)```
+- **Пример ответа (успех)**:
+```json
+[
+    {
+        "id": 1,
+        "user_id": 1,
+        "first_name": "Степан",
+        "last_name": "Степкин",
+        "biography": "какая-то там биография",
+        "photo": "http://bluejay-pretty-clearly.ngrok-free.app/storage/experts/116p1ZUDKSexffKWPFWNAlQ8YvToaMS4eBKOOjgY.jpg",
+        "experience": "какой-то там опыт",
+        "education": "какое-то там образование",
+        "rating": 0,
+        "created_at": "2025-05-01T18:06:03.000000Z",
+        "updated_at": "2025-05-01T18:06:03.000000Z",
+        "categories": [
+            {
+                "id": 1,
+                "category": "Личностный рост",
+                "description": "(цели, дисциплина, продуктивность)",
+                "created_at": "2025-05-01T18:07:01.000000Z",
+                "updated_at": "2025-05-01T18:07:01.000000Z",
+                "pivot": {
+                    "expert_id": 1,
+                    "category_id": 1
+                }
+            },
+            {
+                "id": 3,
+                "category": "Отношения и коммуникация",
+                "description": "(семья, переговоры)",
+                "created_at": "2025-05-01T18:07:01.000000Z",
+                "updated_at": "2025-05-01T18:07:01.000000Z",
+                "pivot": {
+                    "expert_id": 1,
+                    "category_id": 3
+                }
+            }
+        ]
+    },
+    {
+        "expertId": "2",
+        "error": "expert not found"
+    }
+]
+```
+- **Пример ответа (ошибка)**:
+```json
+{
+    "message": "Не получилось получить данные экспертов",
+    "error": "Сообщение об ошибке"
+}
+```

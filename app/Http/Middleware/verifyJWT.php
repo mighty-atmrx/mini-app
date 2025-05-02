@@ -17,7 +17,10 @@ class verifyJWT
      */
     public function handle(Request $request, Closure $next): Response
     {
-        \Log::info('verifyJWT class received');
+        \Log::info('verifyJWT class received', [
+            'url' => $request->url(),
+            'method' => $request->method(),
+        ]);
         try {
             $token = $request->bearerToken();
             if (!$token) {

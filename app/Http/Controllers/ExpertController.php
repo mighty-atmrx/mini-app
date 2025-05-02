@@ -58,21 +58,34 @@ class ExpertController extends Controller
 
     public function getExpertsData(Request $request)
     {
-        $data = $request->validate([
-            'experts_ids' => ['required', 'array'],
+        \Log::info('getExpertsData method received', [
+            'experts_ids' => $request->query('experts_ids', '')
         ]);
+        try {
+            $expertsIds = $request->query('experts_ids', '');
+            $expertsIds = explode(',', str_replace(['[', ']', ' '], '', $expertsIds));
 
-        $expertsData = [];
-        foreach ($data['experts_ids'] as $expertId) {
-            $expert = $this->expertRepository->getExpertById($expertId);
-            if ($expert === null) {
-                $expert = ['expertId' => $expertId, 'error' => 'expert not found'];
-                $expertsData[] += $expert;
-            } else {
-               $expertsData[] += $expert;
+
+            $expertsData = [];
+            foreach ($expertsIds as $expertId) {
+                $expert = $this->expertRepository->getExpertById($expertId);
+                if ($expert === null) {
+                    $expert = ['expertId' => $expertId, 'error' => 'expert not found'];
+                    $expertsData[] = $expert;
+                } else {
+                   $expertsData[] = $expert;
+                }
             }
+            return response()->json($expertsData);
+        } catch (\Exception $e) {
+            \Log::error('getExpertsData Exception', [
+                'exception' => $e->getMessage()
+            ]);
+            return response()->json([
+                'message' => 'Не получилось получить данные экспертов',
+                'error' => $e->getMessage()
+            ]);
         }
-        return $expertsData;
     }
 
     public function store(StoreExpertRequest $request)
