@@ -41,19 +41,20 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ initData }),
-                    credentials: 'include',
                 });
 
                 console.log('Auth response status:', response.status);
                 const data = await response.json();
                 console.log('Auth response:', data);
 
-                if (response.ok && data.access_token && data.refresh_token) {
-                    console.log('Authentication successful', );
+                if (response.ok && data.access_token) {
+                    console.log('Authentication successful');
+                    // Сохраняем access_token в localStorage
+                    localStorage.setItem('access_token', data.access_token);
                     return true;
                 } else {
-                    console.error('Authentication failed:', data.error || 'No tokens received', 'Code:', data.code);
-                    throw new Error(data.error || 'No tokens received');
+                    console.error('Authentication failed:', data.error || 'No token received', 'Code:', data.code);
+                    throw new Error(data.error || 'No token received');
                 }
             } catch (error) {
                 console.error('Auth error:', error.message);
@@ -72,36 +73,16 @@
         return false;
     }
 
-    async function refreshToken() {
-        try {
-            console.log('Refreshing token...');
-            const response = await fetch(`${API_URL}/auth/refresh`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include', // Включаем куки в запрос
-            });
-
-            console.log('Refresh response status:', response.status);
-            const data = await response.json();
-            console.log('Refresh response:', data);
-
-            if (response.ok) {
-                console.log('Token refreshed successfully');
-                return true;
-            } else {
-                console.error('Refresh failed:', data.error || 'Unknown error', 'Code:', data.code);
-                showError('Сессия истекла. Повтори авторизацию.');
-                return false;
-            }
-        } catch (error) {
-            console.error('Refresh token error:', error.message);
-            showError('Ошибка обновления сессии. Повтори авторизацию.');
-            return false;
-        }
-    }
-
     async function fetchUserWithRetry(maxRetries = 1, delay = 1000) {
         let retries = 0;
+        const accessToken = localStorage.getItem('access_token');
+
+        if (!accessToken) {
+            console.error('No access token available');
+            showError('Токен отсутствует. Повтори авторизацию.');
+            document.getElementById('retry-auth').style.display = 'block';
+            return;
+        }
 
         while (retries <= maxRetries) {
             try {
@@ -110,8 +91,8 @@
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`,
                     },
-                    credentials: 'include',
                 });
 
                 console.log('GET /api/user status:', response.status);
@@ -123,11 +104,11 @@
                     displayUser(data);
                     return;
                 } else if (response.status === 401) {
-                    // Access token истёк, пробуем обновить
-                    const refreshed = await refreshToken();
-                    if (!refreshed) {
-                        return;
-                    }
+                    console.error('Token expired or invalid');
+                    showError('Сессия истекла. Повтори авторизацию.');
+                    localStorage.removeItem('access_token');
+                    document.getElementById('retry-auth').style.display = 'block';
+                    return;
                 } else {
                     console.error('Fetch user failed:', data.error || 'Unknown error', 'Code:', data.code);
                     throw new Error(data.error || `HTTP error: ${response.status}`);
@@ -174,11 +155,11 @@
     function displayUser(user) {
         const userInfo = document.getElementById('user-info');
         userInfo.innerHTML = `
-                <p><strong>Имя:</strong> ${user.first_name}</p>
-                <p><strong>Фамилия:</strong> ${user.last_name || '—'}</p>
-                <p><strong>Телефон:</strong> ${user.phone}</p>
-                <p><strong>Дата рождения:</strong> ${formatDate(user.birthdate)}</p>
-            `;
+            <p><strong>Имя:</strong> ${user.first_name}</p>
+            <p><strong>Фамилия:</strong> ${user.last_name || '—'}</p>
+            <p><strong>Телефон:</strong> ${user.phone}</p>
+            <p><strong>Дата рождения:</strong> ${formatDate(user.birthdate)}</p>
+        `;
         document.getElementById('retry-auth').style.display = 'none';
     }
 
@@ -198,7 +179,7 @@
     }
 
     function logout() {
-        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('access_token');
         showMessage('Вы вышли.');
         document.getElementById('user-info').innerHTML = '';
     }

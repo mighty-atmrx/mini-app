@@ -17,8 +17,9 @@ class verifyJWT
      */
     public function handle(Request $request, Closure $next): Response
     {
+        \Log::info('verifyJWT class received');
         try {
-            $token = $request->cookie('access_token');
+            $token = $request->bearerToken();
             if (!$token) {
                 \Log::error('No token provided in request');
                 return response()->json([

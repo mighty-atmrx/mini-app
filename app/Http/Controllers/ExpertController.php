@@ -8,6 +8,7 @@ use App\Models\ExpertCategory;
 use App\Repositories\ExpertRepository;
 use App\Repositories\UserRepository;
 use App\Services\ExpertService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Session\Store;
 use Illuminate\Support\Facades\DB;
@@ -53,6 +54,25 @@ class ExpertController extends Controller
             'expert' => $expert,
             'reviews' => $reviews
         ]);
+    }
+
+    public function getExpertsData(Request $request)
+    {
+        $data = $request->validate([
+            'experts_ids' => ['required', 'array'],
+        ]);
+
+        $expertsData = [];
+        foreach ($data['experts_ids'] as $expertId) {
+            $expert = $this->expertRepository->getExpertById($expertId);
+            if ($expert === null) {
+                $expert = ['expertId' => $expertId, 'error' => 'expert not found'];
+                $expertsData[] += $expert;
+            } else {
+               $expertsData[] += $expert;
+            }
+        }
+        return $expertsData;
     }
 
     public function store(StoreExpertRequest $request)

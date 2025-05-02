@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Traits\Filterable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Expert extends Model
 {
+    use HasFactory;
+    use Filterable;
+
     protected $table = 'experts';
     protected $fillable = [
         'user_id', 'first_name', 'last_name', 'biography',

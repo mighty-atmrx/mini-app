@@ -60,70 +60,21 @@ class TelegramAuthController extends Controller
             }
 
             $accessToken = JWTAuth::fromUser($user);
-            $refreshToken = JWTAuth::fromUser($user, ['refresh_token' => true]);
 
             \Log::info('Tokens generated', [
                 'user_id' => $user->id,
                 'access_token' => $accessToken,
-                'refresh_token' => $refreshToken
             ]);
 
             return response()->json([
                 'access_token' => $accessToken,
-                'refresh_token' => $refreshToken,
+//                'refresh_token' => $refreshToken,
                 'expires_in' => config('jwt.ttl') * 60,
                 'refresh_expires_in' => config('jwt.refresh_ttl') * 60,
-            ], 200)
-                ->cookie('access_token', $accessToken, config('jwt.ttl'), null, null, true, true, false, 'Lax')
-                ->cookie('refresh_token', $refreshToken, config('jwt.refresh_ttl'), null, null, true, true, false, 'Lax');
+            ], 200);
         } catch (\Exception $e) {
             \Log::error('Auth error: ', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Authorization error ' . $e->getMessage()], 401);
-        }
-    }
-
-    public function refresh(Request $request)
-    {
-        try {
-            $refreshToken = $request->cookie('refresh_token');
-            if (!$refreshToken) {
-                return response()->json([
-                    'error' => 'Refresh token not provided',
-                    'code' => 'missing_refresh_token'
-                ], 400);
-            }
-
-            $newAccessToken = JWTAuth::refresh($refreshToken);
-
-            \Log::info('Access token refreshed', [
-                'new_access_token' => $newAccessToken,
-                'refresh_token' => $refreshToken
-            ]);
-
-            return response()->json([
-                'access_token' => $newAccessToken,
-                'expires_in' => config('jwt.ttl') * 60,
-            ], 200)
-                ->cookie('access_token', $newAccessToken, config('jwt.ttl'), null, null, true, true, false, 'Strict');
-        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-            return response()->json([
-                'error' => 'Refresh token expired',
-                'code' => 'refresh_token_expired'
-            ], 401);
-        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-            return response()->json([
-                'error' => 'Refresh token invalid',
-                'code' => 'invalid_token'
-            ], 401);
-        } catch (\Exception $e) {
-            \Log::error('Error refreshing token', [
-                'error' => $e->getMessage(),
-                'code' => 'refresh_failed'
-            ]);
-            return response()->json([
-                'error' => 'Unable to refresh token',
-                'code' => 'refresh_failed'
-            ], 500);
         }
     }
 }
