@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Service;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\Paginator;
 
 class ServiceRepository
 {
@@ -16,12 +17,12 @@ class ServiceRepository
 
     public function getAllServices()
     {
-        return $this->model->all();
+        return $this->model->paginate(10);
     }
 
-    public function getExpertServices(int $expertId): ?Collection
+    public function getExpertServices(int $expertId)
     {
-        return $this->model->where('expert_id', $expertId)->with('category')->get();
+        return $this->model->where('expert_id', $expertId)->with('category')->paginate(10);
     }
 
     public function getServiceById(int $serviceId): ?Service

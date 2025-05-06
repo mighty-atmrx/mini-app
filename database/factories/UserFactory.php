@@ -23,12 +23,31 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        static $baseTelegramIds = [432663193, 592263413, 789456123, 987654321, 897454223];
+        static $baseFirstNames = ['Василий', 'Сергей', 'Петр', 'Магомед', 'Игорь'];
+        static $baseLastNames = ['Олохов', 'Бурунов', 'Петров', 'Магомедов', 'Игривый'];
+        static $baseBirthdates = ['01.01.1991', '02.02.1992', '03.03.1993', '04.04.1995', '05.05.1995'];
+        static $basePhones = ['+77056562323', '+77087674343', '+77012345678', '+77098765432', '+770987654321'];
+        static $baseRoles = ['user', 'user', 'expert', 'expert', 'admin'];
+
+        static $index = 0;
+
+        $telegramUserId = hash('sha256', (string)$baseTelegramIds[$index % count($baseTelegramIds)]);
+        $firstName = $baseFirstNames[$index % count($baseFirstNames)];
+        $lastName = $baseLastNames[$index % count($baseLastNames)];
+        $birthdate = $baseBirthdates[$index % count($baseBirthdates)];
+        $phone = $basePhones[$index % count($basePhones)];
+        $role = $baseRoles[$index % count($baseRoles)];
+
+        $index++;
+
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'telegram_user_id' => $telegramUserId,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'birthdate' => $birthdate,
+            'phone' => $phone,
+            'role' => $role
         ];
     }
 

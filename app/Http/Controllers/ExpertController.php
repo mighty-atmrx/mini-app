@@ -65,9 +65,15 @@ class ExpertController extends Controller
             $expertsIds = $request->query('experts_ids', '');
             $expertsIds = explode(',', str_replace(['[', ']', ' '], '', $expertsIds));
 
+            $validExpertsIds = array_filter($expertsIds, fn($id) => !empty(trim($id)));
+
+            if (empty($validExpertsIds)) {
+                \Log::warning('Valid experts ids not provided', ['experts_ids' => $expertsIds]);
+                return response()->json(['message' => 'Valid experts ids not provided'], 400);
+            }
 
             $expertsData = [];
-            foreach ($expertsIds as $expertId) {
+            foreach ($validExpertsIds as $expertId) {
                 $expert = $this->expertRepository->getExpertById($expertId);
                 if ($expert === null) {
                     $expert = ['expertId' => $expertId, 'error' => 'expert not found'];
@@ -78,13 +84,8 @@ class ExpertController extends Controller
             }
             return response()->json($expertsData);
         } catch (\Exception $e) {
-            \Log::error('getExpertsData Exception', [
-                'exception' => $e->getMessage()
-            ]);
-            return response()->json([
-                'message' => 'Не получилось получить данные экспертов',
-                'error' => $e->getMessage()
-            ]);
+            \Log::error('getExpertsData Exception', ['exception' => $e->getMessage()]);
+            return response()->json(['message' => 'Не получилось получить данные экспертов']);
         }
     }
 
@@ -131,6 +132,8 @@ class ExpertController extends Controller
 
     public function update(UpdateExpertRequest $request, int $expertId)
     {
+        DB::beginTransaction();
+
         $data = $request->validated();
 
         if ($request->hasFile('photo')) {
@@ -143,7 +146,6 @@ class ExpertController extends Controller
             $data['photo'] = '/storage/' . $request->file('photo')->store('experts', 'public');
         }
 
-        DB::beginTransaction();
 
         try {
             $expert = $this->expertService->updateExpert($data, $expertId);

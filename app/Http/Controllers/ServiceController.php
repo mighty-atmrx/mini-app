@@ -30,7 +30,7 @@ class ServiceController extends Controller
     public function index()
     {
         try {
-            $services = $this->serviceRepository->getAllServices()->paginate(10);
+            $services = $this->serviceRepository->getAllServices();
             return ServiceResource::collection($services);
         } catch (\Exception $e) {
             \Log::error('Services error: ' . $e->getMessage());
@@ -44,7 +44,7 @@ class ServiceController extends Controller
     public function getExpertServices(int $expertId)
     {
         try {
-            $services = $this->serviceRepository->getExpertServices($expertId)->paginate(10);
+            $services = $this->serviceRepository->getExpertServices($expertId);
             return response()->json($services);
         } catch (\Exception $e) {
             \Log::error('Services error: ' . $e->getMessage());

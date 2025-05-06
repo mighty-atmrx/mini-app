@@ -12,14 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->append(VerifyJWT::class);
+//        $middleware->append(VerifyJWT::class);
 
-        $middleware->group('api', [
-
-        ]);
+//        $middleware->group('api', []);
 
         $middleware->alias([
-            'verifyJWT' => VerifyJWT::class,
+            'jwt.verify' => VerifyJWT::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

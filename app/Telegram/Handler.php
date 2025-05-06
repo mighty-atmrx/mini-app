@@ -8,7 +8,7 @@ use App\Telegram\State\BirthdateState;
 use App\Telegram\State\NameState;
 use App\Telegram\State\PhoneManualState;
 use App\Telegram\State\PhoneState;
-use app\Telegram\State\StateManager;
+use App\Telegram\State\StateManager;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
 use DefStudio\Telegraph\Keyboard\Button;
 use DefStudio\Telegraph\Keyboard\Keyboard;

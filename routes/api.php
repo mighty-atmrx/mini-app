@@ -39,13 +39,13 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::post('/experts', [ExpertController::class, 'store'])->name('expert.store');
     Route::patch('/experts/{expertId}', [ExpertController::class, 'update'])->name('expert.update');
 
+    Route::get('/favorites/experts', [ExpertController::class, 'getExpertsData'])->name('experts.favorites');
+
     Route::get('/services', [ServiceController::class, 'index'])->name('service.index');
     Route::post('/services', [ServiceController::class, 'store'])->middleware('ensure.expert')->name('service.store');
     Route::patch('/services/{serviceId}', [ServiceController::class, 'updateService'])->middleware('ensure.expert')->name('service.update');
     Route::delete('/services/{serviceId}', [ServiceController::class, 'deleteService'])->name('service.delete');
 });
-Route::get('/favorites/experts', [ExpertController::class, 'getExpertsData'])->name('experts.favorites');
-
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle']);
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);
 Route::post('auth/telegram/refresh', [TelegramAuthController::class, 'refresh']);
