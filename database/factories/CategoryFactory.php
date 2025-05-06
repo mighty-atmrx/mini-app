@@ -35,21 +35,21 @@ class CategoryFactory extends Factory
         ];
 
         static $subtitles = [
-            'Personal growth',
-            'Psychology and coaching',
-            'Relationships and communication',
-            'Spiritual practices',
-            'Esotericism and metaphysics',
-            'Philosophy and worldview',
-            'Body and mind',
-            'Financial literacy and careers',
-            'Health and well-being',
-            'Creative potential',
-            'Conscious Parenting',
-            'Leadership and Social Influence',
-            'Biohacking and Longevity',
-            'Emotional Intelligence',
-            'Art Therapy'
+            'PersonalGrowth',
+            'PsychologyAndCoaching',
+            'RelationshipsAndCommunication',
+            'SpiritualPractices',
+            'EsotericismAndMetaphysics',
+            'PhilosophyAndWorldview',
+            'BodyAndMind',
+            'FinancialLiteracyAndCareers',
+            'HealthAndWellBeing',
+            'CreativePotential',
+            'ConsciousParenting',
+            'LeadershipAndSocialInfluence',
+            'BiohackingAndLongevity',
+            'EmotionalIntelligence',
+            'ArtTherapy'
         ];
 
         static $descriptions = [
