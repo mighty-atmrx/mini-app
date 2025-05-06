@@ -350,14 +350,16 @@
   [
     {
         "id": 1,
-        "category": "Личностный рост",
+        "title": "Личностный рост",
+        "subtitle": "Psychology and coaching",
         "description": "(цели, дисциплина, продуктивность)",
         "created_at": "2025-04-28T19:32:43.000000Z",
         "updated_at": "2025-04-28T19:32:43.000000Z"
     },
     {
         "id": 2,
-        "category": "Психология и коучинг",
+        "title": "Психология и коучинг",
+        "subtitle": "Psychology and coaching",
         "description": "(самооценка, уверенность, страхи)",
         "created_at": "2025-04-28T19:32:43.000000Z",
         "updated_at": "2025-04-28T19:32:43.000000Z"

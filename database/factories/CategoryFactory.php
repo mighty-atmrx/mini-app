@@ -16,7 +16,7 @@ class CategoryFactory extends Factory
      */
     public function definition(): array
     {
-        static $categories = [
+        static $titles = [
             'Личностный рост',
             'Психология и коучинг',
             'Отношения и коммуникация',
@@ -32,6 +32,24 @@ class CategoryFactory extends Factory
             'Биохакинг и долголетие',
             'Эмоциональный интеллект',
             'Арт терапия'
+        ];
+
+        static $subtitles = [
+            'Personal growth',
+            'Psychology and coaching',
+            'Relationships and communication',
+            'Spiritual practices',
+            'Esotericism and metaphysics',
+            'Philosophy and worldview',
+            'Body and mind',
+            'Financial literacy and careers',
+            'Health and well-being',
+            'Creative potential',
+            'Conscious Parenting',
+            'Leadership and Social Influence',
+            'Biohacking and Longevity',
+            'Emotional Intelligence',
+            'Art Therapy'
         ];
 
         static $descriptions = [
@@ -53,15 +71,20 @@ class CategoryFactory extends Factory
         ];
 
         static $index = 0;
-        $category = $categories[$index % count($categories)];
+        $title = $titles[$index % count($titles)];
         $index++;
+
+        static $sub_index = 0;
+        $subTitle = $subtitles[$sub_index % count($subtitles)];
+        $sub_index++;
 
         static $descriptionIndex = 0;
         $description = $descriptions[$descriptionIndex % count($descriptions)];
         $descriptionIndex++;
 
         return [
-            'category' => $category,
+            'title' => $title,
+            'subtitle' => $subTitle,
             'description' => $description,
         ];
     }

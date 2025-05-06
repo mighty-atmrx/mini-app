@@ -50,7 +50,7 @@ class verifyJWT
 
             \Log::info('JWT verified: ', [
                 'user_id' => $user ? $user->id : null,
-                'token' => $request->cookie()['access_token'] ?? null,
+                'token' => $token,
             ]);
         } catch (JWTException $e) {
             \Log::error('JWT error: ', [

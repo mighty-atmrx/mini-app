@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->string('category')->unique();
+            $table->string('title')->unique();
+            $table->string('subtitle')->nullable();
             $table->string('description')->nullable();
             $table->timestamps();
         });
