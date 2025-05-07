@@ -35,7 +35,7 @@ class UserRepository
             throw new \Exception('Ошибка конфигурации модели User.');
         }
 
-        $user->save();
+        $user->saveOrFail();
 
         \Log::info('User saved', [
             'user_id' => $user->id,
@@ -45,8 +45,8 @@ class UserRepository
 
     public function updateUserRole(string $role, int $userId)
     {
-        $user = User::find($userId);
+        $user = User::findOrFail($userId);
         $user->role = $role;
-        $user->save();
+        $user->saveOrFail();
     }
 }

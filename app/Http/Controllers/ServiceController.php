@@ -11,6 +11,7 @@ use App\Repositories\ExpertRepository;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response;
 
 class ServiceController extends Controller
 {
@@ -35,9 +36,8 @@ class ServiceController extends Controller
         } catch (\Exception $e) {
             \Log::error('Services error: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Ошибка при получении данных об услугах.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -49,9 +49,8 @@ class ServiceController extends Controller
         } catch (\Exception $e) {
             \Log::error('Services error: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Ошибка при получении данных об услугах эксперта.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -62,15 +61,12 @@ class ServiceController extends Controller
 
             $expertId = $request->input('expert_id');
             if (!$expertId) {
-                return response()->json(['message' => 'Expert ID is required'], 400);
+                return response()->json(['message' => 'Поле c id эксперта обязательно!'], Response::HTTP_BAD_REQUEST);
             }
             $data['expert_id'] = $expertId;
 
             DB::beginTransaction();
             $service = $this->serviceRepository->create($data);
-            if (!$service) {
-                throw new \Exception('Failed to create service');
-            }
 
             $expertCategory = ExpertCategory::where('expert_id', $expertId)
                 ->where('category_id', $service->category_id)
@@ -88,14 +84,9 @@ class ServiceController extends Controller
             \Log::info('Service added successfully', ['service' => $service->toArray()]);
 
             return response()->json([
-                'message' => 'Service added successfully',
+                'message' => 'Услуга успешно создана.',
                 'service' => $service
-            ], 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'message' => 'Validation error',
-                'errors' => $e->getMessage()
-            ], 422);
+            ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Service create error', [
@@ -103,16 +94,15 @@ class ServiceController extends Controller
                 'data' => $data
             ]);
             return response()->json([
-                'message' => 'Service not created',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Ошибка при создании услуги.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     public function updateService(UpdateServiceRequest $updateRequest, int $serviceId){
         $service = $this->serviceRepository->getServiceById($serviceId);
         if (!$service) {
-            return response()->json(['message' => 'Service not found',], 404);
+            return response()->json(['message' => 'Услуга не найдена.',], Response::HTTP_NOT_FOUND);
         }
 
         $this->authorize('update', $service);
@@ -124,7 +114,7 @@ class ServiceController extends Controller
         try {
             $service = $this->serviceRepository->update($data, $serviceId);
             if (!$service) {
-                throw new \Exception('Failed to update service');
+                throw new \Exception('Ошибка обновления данных услуги.');
             }
 
             $expertCategory = ExpertCategory::where('expert_id', $service->expert_id)
@@ -140,21 +130,21 @@ class ServiceController extends Controller
 
             DB::commit();
 
-            \Log::info('Service updated successfully');
+            \Log::info('Данные услуги были успешно обновлены.');
 
             return response()->json([
-                'message' => 'Service updated successfully',
+                'message' => 'Данные услуги были успешно обновлены.',
                 'service' => $service
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Service update error', [
                 'service_id' => $serviceId,
                 'error' => $e->getMessage()
             ]);
             return response()->json([
-                'message' => 'Service not updated',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Не получилось обновить данные услуги.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -162,26 +152,27 @@ class ServiceController extends Controller
     {
         $service = $this->serviceRepository->getServiceById($serviceId);
         if (!$service) {
-            return response()->json(['message' => 'Service not found',], 404);
+            return response()->json(['message' => 'Услуга не найдена.',], Response::HTTP_NOT_FOUND);
         }
 
         $this->authorize('delete', $service);
 
         DB::beginTransaction();
         try {
-            $this->serviceRepository->delete($serviceId);
+            if(!$this->serviceRepository->delete($serviceId)){
+                throw new \Exception('Ошибка при удалении данных услуги.');
+            }
             DB::commit();
 
             \Log::info('Service deleted successfully');
             return response()->json([
-                'message' => 'Service deleted successfully'
+                'message' => 'Услуга была успешно удалена.'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Service delete error', ['error' => $e->getMessage()]);
             return response()->json([
-                'message' => 'Service not deleted',
-                'error' => $e->getMessage()
+                'message' => 'Не удалось удалить услугу.'
             ]);
         }
     }

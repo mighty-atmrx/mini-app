@@ -7,6 +7,7 @@ use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response;
 
 class FixTelegraphBot
 {
@@ -21,7 +22,7 @@ class FixTelegraphBot
 
         if (!$bot) {
             Log::error('Bot not found', ['token' => $token]);
-            return response('Bot not found', 404);
+            return response('Bot not found', Response::HTTP_NOT_FOUND);
         }
 
         $request->merge(['bot' => $bot]);

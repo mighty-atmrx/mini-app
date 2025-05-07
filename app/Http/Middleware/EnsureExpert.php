@@ -25,7 +25,9 @@ class EnsureExpert
         $expert = $this->expertRepository->getExpertByUserId($userId);
         if (!auth()->check() || auth()->user()->role !== 'expert' || !$expert) {
             \Log::error('Expert not found', ['user_id' => $userId]);
-            return response()->json(['message' => 'Expert not found'], 404);
+            return response()->json([
+                'message' => 'Expert not found'
+            ], Response::HTTP_NOT_FOUND);
         }
 
         $request->merge(['expert_id' => $expert->id]);

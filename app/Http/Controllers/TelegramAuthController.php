@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Services\TelegramAuthService;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\JWT;
 
@@ -29,24 +30,33 @@ class TelegramAuthController extends Controller
             $initData = $request->input('initData');
             if (!$initData) {
                 \Log::error('No initData provided');
-                return response()->json(['error' => 'No initData provided'], 400);
+                return response()->json([
+                    'error' => 'Не предоставлены данные пользователя.'
+                ], Response::HTTP_BAD_REQUEST);
             }
             \Log::info('InitData', ['initData' => $initData]);
 
             $userData = $this->telegramAuthService->verifyInitData($request->input('initData'));
             if (!$userData) {
                 \Log::error('Invalid userData');
-                return response()->json(['error' => 'Invalid userData'], 401);
+                return response()->json([
+                    'error' => 'Неверные данные пользователя.'
+                ], Response::HTTP_UNAUTHORIZED);
             }
 
             $telegramId = (string)$userData['id'];
             if (!$telegramId) {
                 \Log::error('No telegramId in userData', ['userData' => $userData]);
-                return response()->json(['error' => 'No telegramId in userData'], 401);
+                return response()->json([
+                    'error' => 'Не предоставлен телеграм id пользователя.'
+                ], Response::HTTP_UNAUTHORIZED);
             }
 
             $hashedTelegramId = hash('sha256', $telegramId);
-            \Log::info('Hashed telegramId', ['telegram_id' => $telegramId, 'hashed_telegram_id' => $hashedTelegramId]);
+            \Log::info('Hashed telegramId', [
+                'telegram_id' => $telegramId,
+                'hashed_telegram_id' => $hashedTelegramId
+            ]);
 
             $user = $this->userRepository->findByTelegramId($hashedTelegramId);
             if (!$user) {
@@ -68,13 +78,11 @@ class TelegramAuthController extends Controller
 
             return response()->json([
                 'access_token' => $accessToken,
-//                'refresh_token' => $refreshToken,
                 'expires_in' => config('jwt.ttl') * 60,
-                'refresh_expires_in' => config('jwt.refresh_ttl') * 60,
-            ], 200);
+            ], Response::HTTP_OK);
         } catch (\Exception $e) {
             \Log::error('Auth error: ', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Authorization error ' . $e->getMessage()], 401);
+            return response()->json(['error' => 'Не авторизован.'], Response::HTTP_UNAUTHORIZED);
         }
     }
 }

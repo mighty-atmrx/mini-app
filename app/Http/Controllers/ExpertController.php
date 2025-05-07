@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Session\Store;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response;
 
 class ExpertController extends Controller
 {
@@ -45,7 +46,7 @@ class ExpertController extends Controller
             \Log::warning("Expert not found with id {$expertId}");
             return response()->json([
                 'message' => 'Expert not found with id ' . $expertId
-            ]);
+            ], Response::HTTP_NOT_FOUND);
         }
 
         $reviews = $expert->reviews()->with('user')->paginate(5);
@@ -62,30 +63,24 @@ class ExpertController extends Controller
             'experts_ids' => $request->query('experts_ids', '')
         ]);
         try {
-            $expertsIds = $request->query('experts_ids', '');
-            $expertsIds = explode(',', str_replace(['[', ']', ' '], '', $expertsIds));
-
-            $validExpertsIds = array_filter($expertsIds, fn($id) => !empty(trim($id)));
+            $expertsIds = explode(',', str_replace(['[', ']', ' '], '', $request->query('experts_ids', '')));
+            $validExpertsIds = array_filter(array_map('intval', $expertsIds));
 
             if (empty($validExpertsIds)) {
                 \Log::warning('Valid experts ids not provided', ['experts_ids' => $expertsIds]);
-                return response()->json(['message' => 'Valid experts ids not provided'], 400);
+                return response()->json([
+                    'message' => 'Не предоставлены id действительных экспертов.'
+                ], Response::HTTP_BAD_REQUEST);
             }
 
-            $expertsData = [];
-            foreach ($validExpertsIds as $expertId) {
-                $expert = $this->expertRepository->getExpertById($expertId);
-                if ($expert === null) {
-                    $expert = ['expertId' => $expertId, 'error' => 'expert not found'];
-                    $expertsData[] = $expert;
-                } else {
-                   $expertsData[] = $expert;
-                }
-            }
-            return response()->json($expertsData);
-        } catch (\Exception $e) {
-            \Log::error('getExpertsData Exception', ['exception' => $e->getMessage()]);
-            return response()->json(['message' => 'Не получилось получить данные экспертов']);
+            $expertsData = [$this->expertRepository->getCollectionOfExpertsByIds($expertsIds)];
+
+            return response()->json($expertsData, Response::HTTP_OK);
+        } catch (\Throwable $e) {
+            \Log::error('getExpertsData Exception', ['exception' => $e]);
+            return response()->json([
+                'message' => 'Не получилось получить данные экспертов'
+            ], Response::HTTP_NOT_FOUND);
         }
     }
 
@@ -96,8 +91,8 @@ class ExpertController extends Controller
         if ($expert === true) {
             \Log::warning('Expert already created');
             return response()->json([
-                'message' => 'Expert already created'
-            ], 409);
+                'message' => 'Эксперт уже существует.'
+            ], Response::HTTP_CONFLICT);
         }
 
         $data = $request->validated();
@@ -118,15 +113,14 @@ class ExpertController extends Controller
             return response()->json([
                 'message' => 'Эксперт успешно создан',
                 'expert' => $expert
-            ], 201);
+            ], Response::HTTP_CREATED);
         } catch (\Throwable $e) {
             DB::rollBack();
-            \Log::error('Ошибка при создании эксперта: ' . $e->getMessage());
+            \Log::error('Ошибка при создании эксперта', ['error' => $e]);
 
             return response()->json([
-                'message' => 'Ошибка при создании пользователя',
-                'error' => $e->getMessage()
-            ],  500);
+                'message' => 'Ошибка при создании пользователя'
+            ],  Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -140,7 +134,8 @@ class ExpertController extends Controller
             $oldExpert = $this->expertRepository->getExpertById($expertId);
 
             if ($oldExpert && $oldExpert->photo) {
-                \Storage::dist('public')->delete(str_replace('/storage', '', $oldExpert->photo));
+                $relativePath = ltrim(str_replace('/storage/', '', $oldExpert->photo), '/');
+                \Storage::disk('public')->delete($relativePath);
             }
 
             $data['photo'] = '/storage/' . $request->file('photo')->store('experts', 'public');
@@ -162,15 +157,14 @@ class ExpertController extends Controller
             return response()->json([
                 'message' => 'Экспер успешно обновлен',
                 'expert' => $expert
-            ], 200);
+            ], Response::HTTP_OK);
         } catch (\Throwable $e) {
             DB::rollBack();
-            \Log::error('Ошибка обновления эксперта: ' . $e->getMessage());
+            \Log::error('Ошибка обновления эксперта: ' . $e);
 
             return response()->json([
-                'message' => 'Не удалось обновить данные эксперта',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Не удалось обновить данные эксперта'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

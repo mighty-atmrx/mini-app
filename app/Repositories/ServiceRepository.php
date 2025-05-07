@@ -4,9 +4,10 @@ namespace App\Repositories;
 
 use App\Models\Service;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 
-class ServiceRepository
+class  ServiceRepository
 {
     protected $model;
 
@@ -15,24 +16,24 @@ class ServiceRepository
         $this->model = $service;
     }
 
-    public function getAllServices()
+    public function getAllServices(): LengthAwarePaginator
     {
         return $this->model->paginate(10);
     }
 
-    public function getExpertServices(int $expertId)
+    public function getExpertServices(int $expertId): LengthAwarePaginator
     {
         return $this->model->where('expert_id', $expertId)->with('category')->paginate(10);
     }
 
     public function getServiceById(int $serviceId): ?Service
     {
-        return $this->model->find($serviceId);
+        return $this->model->findOfFail($serviceId);
     }
 
     public function create(array $data): Service
     {
-        return $this->model->create($data);
+        return $this->model->createOrFail($data);
     }
 
     public function update(array $data, int $serviceId): ?Service
@@ -41,7 +42,7 @@ class ServiceRepository
         if (!$service) {
             return null;
         }
-        $service->update($data);
+        $service->updateOfFail($data);
         return $service;
     }
 
@@ -51,6 +52,6 @@ class ServiceRepository
         if (!$service) {
             return false;
         }
-        return $service->delete();
+        return $service->deleteOrFail();
     }
 }

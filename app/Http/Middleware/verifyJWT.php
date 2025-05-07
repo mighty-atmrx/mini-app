@@ -26,9 +26,8 @@ class verifyJWT
             if (!$token) {
                 \Log::error('No token provided in request');
                 return response()->json([
-                    'error' => 'Token not provided',
-                    'code' => 'missing_token'
-                ], 401);
+                    'error' => 'Token not provided'
+                ], Response::HTTP_UNAUTHORIZED);
             }
 
             JWTAuth::setToken($token);
@@ -37,9 +36,8 @@ class verifyJWT
             if (!$user) {
                 \Log::error('User not found for token', ['token' => $token]);
                 return response()->json([
-                    'error' => 'User not found',
-                    'code' => 'user_not_found'
-                ], 401);
+                    'error' => 'User not found'
+                ], Response::HTTP_UNAUTHORIZED);
             }
 
             auth()->setUser($user);
@@ -59,9 +57,8 @@ class verifyJWT
             ]);
             return response()->json([
                 'error' => 'Unauthorized',
-                'code' => $e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException ? 'invalid_token' : 'jwt_error',
-                'details' => $e->getMessage()
-            ], 401);
+                'code' => $e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException ? 'invalid_token' : 'jwt_error'
+            ], Response::HTTP_UNAUTHORIZED);
         }
         return $next($request);
     }

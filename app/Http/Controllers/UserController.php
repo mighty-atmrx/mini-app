@@ -8,6 +8,7 @@ use App\Services\UserService;
 use App\Telegram\InputValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 
@@ -49,7 +50,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('User creation failed', ['error' => $e->getMessage()]);
-            return response()->json(['User creation failed: ' => $e->getMessage()], 500);
+            return response()->json(['User creation failed'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -60,7 +61,7 @@ class UserController extends Controller
         $user = $this->userRepository->findByTelegramId($hashedTelegramId);
         if (!$user) {
             \Log::error('User not found', ['telegram_id' => $userTelegramId]);
-            return response()->json(['error' => 'User not found'], 404);
+            return response()->json(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
 
         $authUser = JWTAuth::user();
@@ -70,7 +71,7 @@ class UserController extends Controller
                 'auth_user_id' => $authUser->id,
                 'requested_user_id' => $user->id,
             ]);
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
         }
         return response()->json($user);
     }

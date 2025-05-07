@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Expert;
+use Ramsey\Collection\Collection;
 
 class ExpertRepository
 {
@@ -28,6 +29,11 @@ class ExpertRepository
         return $this->model->with('categories')->get();
     }
 
+    public function getCollectionOfExpertsByIds(array $expertIds)
+    {
+        return $this->model->with('categories')->whereIn('id', $expertIds)->get();
+    }
+
     public function create(array $data): Expert
     {
         return $this->model->create($data);
@@ -37,7 +43,7 @@ class ExpertRepository
     {
         $expert = $this->getExpertById($expertId);
         if (!$expert) {
-            \Log::error('Expert not found');
+            \Log::error('Expert not found with id="' . $expertId . '"');
             return null;
         }
         $expert->update($data);

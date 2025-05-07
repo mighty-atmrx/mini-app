@@ -30,9 +30,8 @@ class ExpertService
         $expert = $this->expertRepository->getExpertById($expertId);
         if (!$expert || $expert->user_id !== auth()->id()) {
             \Log::error('Expert not found or access denied');
-            throw new \Exception('Expert not found or access denied');
+            throw new \Exception('Эксперт не найден или доступ запрещен.');
         }
-        $expert = $this->expertRepository->update($data, $expertId);
-        return $expert;
+        return $this->expertRepository->update($data, $expertId);
     }
 }

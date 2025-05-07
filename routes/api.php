@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Telegram\Handler;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\HttpFoundation\Response;
 
 
 Route::middleware(['jwt.verify'])->group(function () {
@@ -19,7 +20,10 @@ Route::middleware(['jwt.verify'])->group(function () {
             'auth_error' => $user ? null : 'No user Authenticated'
         ]);
         if (!$user) {
-            return response()->json(['error' => 'Unauthorized', 'code' => 'no_user'], 401);
+            return response()->json([
+                'error' => 'Unauthorized',
+                'code' => 'no_user'
+            ], Response::HTTP_UNAUTHORIZED);
         }
         return response()->json([
             'id' => $user->id,
@@ -27,7 +31,7 @@ Route::middleware(['jwt.verify'])->group(function () {
             'last_name' => $user->last_name ?? '',
             'phone' => $user->phone ?? 'Не указан',
             'birthdate' => $user->birthdate ?? 'Не указана',
-        ]);
+        ], Response::HTTP_OK);
     });
     Route::get('/users/{telegram_id}', [UserController::class, 'show']);
 

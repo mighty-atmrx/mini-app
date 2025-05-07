@@ -5,6 +5,7 @@ namespace App\Http\Requests\Service;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
 
 class StoreServiceRequest extends FormRequest
 {
@@ -40,7 +41,7 @@ class StoreServiceRequest extends FormRequest
         ]);
 
         throw new HttpResponseException(
-            response()->json(['errors' => $validator->errors()], 422)
+            response()->json('Ошибка валидации данных.', Response::HTTP_UNPROCESSABLE_ENTITY)
         );
     }
 }

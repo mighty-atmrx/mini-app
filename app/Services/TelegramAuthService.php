@@ -58,7 +58,10 @@ class TelegramAuthService
         \Log::info('Signature check', ['computedHash' => $computedHash, 'receivedHash' => $params['hash']]);
 
         if (!hash_equals($params['hash'], $computedHash)) {
-            \Log::error('Invalid initData signature', ['computedHash' => $computedHash, 'receivedHash' => $params['hash']]);
+            \Log::error('Invalid initData signature', [
+                'computedHash' => $computedHash,
+                'receivedHash' => $params['hash']
+            ]);
             return null;
         }
 
