@@ -14,7 +14,7 @@ class FixTelegraphBot
     {
         Log::info('Middleware started', ['path' => $request->path(), 'method' => $request->method()]);
 
-        $token = $request->route('bot');
+        $token = $request->route('bot')->token;
         Log::info('Checking bot with token', ['token' => $token]);
 
         $bot = TelegraphBot::where('token', $token)->first();
