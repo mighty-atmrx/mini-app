@@ -29,6 +29,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->renderable(function (Throwable $e, $request) {
             if ($request->expectsJson()) {
+                if(config('app.debug')) {
+                    return null;
+                }
+
                 $status = 500;
                 $message = 'Произошла ошибка. Попробуйте позже.';
 
@@ -45,7 +49,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
 
                 logger()->error($e);
-
                 return response()->json([
                     'message' => $message,
                 ], $status);

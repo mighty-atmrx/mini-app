@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Filters\Filter;
 use App\Http\Requests\Expert\StoreExpertRequest;
 use App\Http\Requests\Expert\UpdateExpertRequest;
+use App\Http\Requests\FilterRequest;
+use App\Models\Expert;
 use App\Models\ExpertCategory;
 use App\Repositories\ExpertRepository;
 use App\Repositories\UserRepository;
@@ -33,9 +36,11 @@ class ExpertController extends Controller
         $this->userRepository = $userRepository;
     }
 
-    public function index()
+    public function index(FilterRequest $request)
     {
-        $experts = $this->expertRepository->getAllExperts();
+        $data = $request->validated();
+        $filter = app()->make(Filter::class, ['queryParams' => array_filter($data)]);
+        $experts = $this->expertRepository->getAllExperts($filter);
         return response()->json($experts);
     }
 

@@ -16,9 +16,9 @@ class  ServiceRepository
         $this->model = $service;
     }
 
-    public function getAllServices(): LengthAwarePaginator
+    public function getAllServices($filter): LengthAwarePaginator
     {
-        return $this->model->paginate(10);
+        return Service::filter($filter)->paginate(10);
     }
 
     public function getExpertServices(int $expertId): LengthAwarePaginator

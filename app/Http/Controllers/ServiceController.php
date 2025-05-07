@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Filters\Filter;
+use App\Http\Requests\FilterRequest;
 use App\Http\Requests\Service\StoreServiceRequest;
 use App\Http\Requests\Service\UpdateServiceRequest;
 use App\Http\Resources\ServiceResource;
@@ -28,10 +30,12 @@ class ServiceController extends Controller
         $this->expertRepository = $expertRepository;
     }
 
-    public function index()
+    public function index(FilterRequest $request)
     {
         try {
-            $services = $this->serviceRepository->getAllServices();
+            $data = $request->validated();
+            $filter = app()->make(Filter::class, ['queryParams' => $data]);
+            $services = $this->serviceRepository->getAllServices($filter);
             return ServiceResource::collection($services);
         } catch (\Exception $e) {
             \Log::error('Services error: ' . $e->getMessage());

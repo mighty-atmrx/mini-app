@@ -22,11 +22,19 @@ class FilterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => 'string|nullable',
-            'last_name' => 'string|nullable',
+            'search' => 'string|nullable',
             'category_id' => 'integer|nullable',
             'rating' => 'float|nullable',
-            'price' => 'float|nullable',
+            'isAFree' => 'boolean|nullable',
         ];
+    }
+
+    public function prepareForValidation()
+    {
+        if ($this->has('isAFree')) {
+            $this->merge([
+                'isAFree' => filter_var($this->input('isAFree'), FILTER_VALIDATE_BOOLEAN)
+            ]);
+        }
     }
 }

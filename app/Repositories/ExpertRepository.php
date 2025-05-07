@@ -24,9 +24,9 @@ class ExpertRepository
         return $this->model->where('user_id', $userId)->with('categories')->first();
     }
 
-    public function getAllExperts()
+    public function getAllExperts($filter)
     {
-        return $this->model->with('categories')->get();
+        return $this->model->with('categories')->filter($filter)->get();
     }
 
     public function getCollectionOfExpertsByIds(array $expertIds)
