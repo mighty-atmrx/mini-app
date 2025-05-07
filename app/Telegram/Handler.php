@@ -51,7 +51,7 @@ class Handler extends WebhookHandler
                 'user_id' => $user->id,
             ]);
             $this->chat->photo($imageUrl)
-                ->message("*Привет, {$user->first_name}!* Рады видеть тебя снова!")
+                ->markdown("*Привет, {$user->first_name}!* Рады видеть тебя снова!")
                 ->keyboard(KeyboardFactory::makeAppKeyboard(config('telegram.mini_app_url')))
                 ->send();
             return;
@@ -59,7 +59,7 @@ class Handler extends WebhookHandler
 
         \Log::info('No user found, starting registration', ['telegram_id' => $this->chat->chat_id]);
         $this->chat->photo($imageUrl)
-            ->message("*Привет! Нажми “Продолжить”* для регистрации.")
+            ->markdown("*Привет! Нажми “Продолжить”* для регистрации.")
             ->keyboard(Keyboard::make()->buttons([
                 Button::make('Продолжить')->action('getUserData'),
             ]))
