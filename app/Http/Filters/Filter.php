@@ -7,15 +7,14 @@ use Illuminate\Database\Eloquent\Builder;
 class Filter extends AbstractFilter
 {
     protected const SEARCH = 'search';
-    protected const CATEGORY_ID = 'category_id';
+    protected const CATEGORY = 'category';
     protected const RATING = 'rating';
-//    protected const IS_A_FREE = 'isAFree';
 
     protected function getCallbacks(): array
     {
         return [
             self::SEARCH => [$this, 'search'],
-            self::CATEGORY_ID => [$this, 'category_id'],
+            self::CATEGORY => [$this, 'category'],
             self::RATING => [$this, 'rating'],
             'isAFree' => [$this, 'isAFree'],
         ];
@@ -23,32 +22,55 @@ class Filter extends AbstractFilter
 
     protected function search(Builder $builder, $value)
     {
-        $builder->where(function ($query) use ($value) {
-            $query->where('first_name', 'like', '%' . $value . '%');
+        if (empty($value)) {
+            return $builder;
+        }
+        \Log::info('Applying search filter', ['value' => $value]);
+
+        $lowerValue = mb_strtolower($value);
+        \Log::info('Lowercased value', ['lowerValue' => $lowerValue]);
+
+        $builder->where(function ($query) use ($lowerValue) {
+            $query->whereRaw('LOWER(experts.first_name) LIKE ?', ['%' . $lowerValue . '%'])
+                ->orWhereRaw('LOWER(experts.last_name) LIKE ?', ['%' . $lowerValue . '%'])
+                ->orWhereHas('categories', function ($categoryQuery) use ($lowerValue) {
+                    $categoryQuery->whereRaw('LOWER(categories.title) LIKE ?', ['%' . $lowerValue . '%'])
+                        ->orWhereRaw('LOWER(categories.description) LIKE ?', ['%' . $lowerValue . '%']);
+                })
+            ;
         });
 
-        $builder->OrWhere(function ($query) use ($value) {
-            $query->where('last_name', 'like', '%' . $value . '%');
-        });
+        $builder->orderByRaw(
+            "CASE
+                    WHEN LOWER(experts.first_name) LIKE ? THEN 0
+                    WHEN LOWER(experts.last_name) LIKE ? THEN 1
+                    ELSE 2
+                 END",
+            [strtolower("{$value}%"), strtolower("{$value}%")]
+        );
 
-        $builder->OrWhere(function ($query) use ($value) {
-            $query->where('categories.subtitle', 'like', '%' . $value . '%');
-        });
-
-        $builder->orderByRaw("CASE
-                                WHEN first_name LIKE ? THEN 0
-                                WHEN last_name LIKE ? THEN 1
-                                WHEN categories.subtitle LIKE ? THEN 2
-                                ELSE 3
-                              END", ['%' . $value . '%', '%' . $value . '%']);
-        // Настроить поиск сначала по имени + фамилии,
-        // потом по категории
-        // потом по описанию категории
+        \Log::info('Query built', ['sql' => $builder->toSql(), 'bindings' => $builder->getBindings()]);
+        return $builder;
     }
 
-    protected function category_id(Builder $builder, $value)
+    protected function category(Builder $builder, $value)
     {
-        $builder->where('category_id', $value);
+        if (empty($value)) {
+            return $builder;
+        }
+
+        \Log::info('Applying category filter', ['value' => $value]);
+        $lowerValue = mb_strtolower($value);
+        \Log::info('Lowercased value', ['lowerValue' => $lowerValue]);
+
+        $builder->where(function ($query) use ($lowerValue) {
+            $query->whereHas('categories', function ($categoryQuery) use ($lowerValue) {
+                $categoryQuery->whereRaw('LOWER(categories.subtitle) LIKE ?', ['%' . $lowerValue . '%']);
+            });
+        });
+
+        \Log::info('Query built', ['sql' => $builder->toSql(), 'bindings' => $builder->getBindings()]);
+        return $builder;
     }
 
     protected function rating(Builder $builder, $value)

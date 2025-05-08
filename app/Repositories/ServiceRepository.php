@@ -33,7 +33,7 @@ class  ServiceRepository
 
     public function create(array $data): Service
     {
-        return $this->model->createOrFail($data);
+        return $this->model->create($data);
     }
 
     public function update(array $data, int $serviceId): ?Service
@@ -42,7 +42,7 @@ class  ServiceRepository
         if (!$service) {
             return null;
         }
-        $service->updateOfFail($data);
+        $service->update($data);
         return $service;
     }
 
@@ -52,6 +52,6 @@ class  ServiceRepository
         if (!$service) {
             return false;
         }
-        return $service->deleteOrFail();
+        return $service->delete();
     }
 }

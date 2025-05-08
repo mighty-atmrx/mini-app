@@ -26,7 +26,7 @@ class ExpertRepository
 
     public function getAllExperts($filter)
     {
-        return $this->model->with('categories')->filter($filter)->get();
+        return $this->model->with('categories')->filter($filter)->paginate(10);
     }
 
     public function getCollectionOfExpertsByIds(array $expertIds)
