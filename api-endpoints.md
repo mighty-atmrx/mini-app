@@ -715,3 +715,307 @@
     "error": "Сообщение об ошибке"
 }
 ```
+
+### Фильтры
+### GET /api/experts?search=
+- **Описание**: Фильтр по поиску.
+- **Параметры**:
+    - Пользователь может делать запрос на поиск по имени, фамилии, категории на русском, описанию категории
+- **Авторизация**: Есть.
+- **Пример запроса**:
+  ```/api/experts?search=Петр```
+
+- **Пример ответа (успех)**:
+```json
+{
+    "current_page": 1,
+    "data": [
+        {
+            "id": 1,
+            "user_id": 3,
+            "first_name": "Петр",
+            "last_name": "Брынчушкин",
+            "biography": "В детстве я очень любил наблюдать за тем, как бабушка пекет пирожки. Теперь я сам их пеку.",
+            "photo": "https://randomuser.me/api/portraits/men/17.jpg",
+            "experience": "10 лет уже пеку лучшие пирожки в городе.",
+            "education": "3 года в пекарно-кулинарном техникуме, а также у бабушки на каникулах.",
+            "rating": 0,
+            "created_at": "2025-05-05T18:15:18.000000Z",
+            "updated_at": "2025-05-05T18:15:18.000000Z",
+            "categories": [
+                {
+                    "id": 1,
+                    "title": "Личностный рост",
+                    "subtitle": "PersonalGrowth",
+                    "description": "(цели, дисциплина, продуктивность)",
+                    "created_at": "2025-05-07T08:34:27.000000Z",
+                    "updated_at": "2025-05-07T08:34:27.000000Z",
+                    "pivot": {
+                        "expert_id": 1,
+                        "category_id": 1
+                    }
+                }
+            ]
+        }
+    ],
+    "first_page_url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts?page=1",
+    "from": 1,
+    "last_page": 1,
+    "last_page_url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts?page=1",
+    "links": [
+        {
+            "url": null,
+            "label": "&laquo; Previous",
+            "active": false
+        },
+        {
+            "url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts?page=1",
+            "label": "1",
+            "active": true
+        },
+        {
+            "url": null,
+            "label": "Next &raquo;",
+            "active": false
+        }
+    ],
+    "next_page_url": null,
+    "path": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts",
+    "per_page": 10,
+    "prev_page_url": null,
+    "to": 1,
+    "total": 1
+}
+```
+- **Пример ответа (ошибка)**:
+- (Если пользователь введет данные, а такого эксперта нет, то он ничего не получит)
+```json
+{
+    "message": "Ошибка при получении данных"
+}
+```
+
+
+### GET /api/experts?category=
+- **Описание**: Фильтр по категориям.
+- **Параметры**:
+    - Пользователь выбирает категорию из списка и получает экспертов в этой категории
+- **Авторизация**: Есть.
+- **Пример запроса**:
+  ```/api/experts?category=psychology```
+
+- **Пример ответа (успех)**:
+```json
+{
+    "current_page": 1,
+    "data": [
+        {
+            "id": 2,
+            "user_id": 4,
+            "first_name": "Магомед",
+            "last_name": "Магомедов",
+            "biography": "Последние 10 лет активно работаю и развиваюсь в области ораторского мастерства и эффективных коммуникаций.",
+            "photo": "https://randomuser.me/api/portraits/men/64.jpg",
+            "experience": "10 лет вещаю людям про жизнь и то, как важно быть оратором.",
+            "education": "Учился в горном институте на оратора 4 года, а после этого практиковался на улице.",
+            "rating": 0,
+            "created_at": "2025-05-05T18:15:18.000000Z",
+            "updated_at": "2025-05-05T18:15:18.000000Z",
+            "categories": [
+                {
+                    "id": 2,
+                    "title": "Психология и коучинг",
+                    "subtitle": "PsychologyAndCoaching",
+                    "description": "(самооценка, уверенность, страхи)",
+                    "created_at": "2025-05-07T08:34:27.000000Z",
+                    "updated_at": "2025-05-07T08:34:27.000000Z",
+                    "pivot": {
+                        "expert_id": 2,
+                        "category_id": 2
+                    }
+                }
+            ]
+        }
+    ],
+    "first_page_url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts?page=1",
+    "from": 1,
+    "last_page": 1,
+    "last_page_url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts?page=1",
+    "links": [
+        {
+            "url": null,
+            "label": "&laquo; Previous",
+            "active": false
+        },
+        {
+            "url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts?page=1",
+            "label": "1",
+            "active": true
+        },
+        {
+            "url": null,
+            "label": "Next &raquo;",
+            "active": false
+        }
+    ],
+    "next_page_url": null,
+    "path": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts",
+    "per_page": 10,
+    "prev_page_url": null,
+    "to": 1,
+    "total": 1
+}
+```
+- **Пример ответа (ошибка)**:
+- (Если экспертов в данной категории нет, то пользователь получит пустую страницу)
+```json
+{
+    "message": "Ошибка при получении данных"
+}
+```
+
+### GET /api/services?isAFree=
+- **Описание**: Фильтр по стоимости(платно/бесплатно).
+- **Параметры**:
+    - Пользователь выбирает платно/бесплатно и получает курсы по фильтру
+- **Авторизация**: Есть.
+- **Пример запроса**:
+  ```/api/services?isAFree=true(или false(или 1 и 0))```
+
+- **Пример ответа (успех)**:
+```json
+{
+    "data": [
+        {
+            "id": 4,
+            "title": "Курс всех курсов курс",
+            "description": "описание самого крутого курса в мире",
+            "price": 0,
+            "category_id": 4,
+            "expert_id": 3
+        },
+        {
+            "id": 5,
+            "title": "Самый крутой курс на преокте",
+            "description": "Описание самого крутого курса на проекте",
+            "price": 0,
+            "category_id": 4,
+            "expert_id": 3
+        }
+    ],
+    "links": {
+        "first": "http://bluejay-pretty-clearly.ngrok-free.app/api/services?page=1",
+        "last": "http://bluejay-pretty-clearly.ngrok-free.app/api/services?page=1",
+        "prev": null,
+        "next": null
+    },
+    "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 1,
+        "links": [
+            {
+                "url": null,
+                "label": "&laquo; Previous",
+                "active": false
+            },
+            {
+                "url": "http://bluejay-pretty-clearly.ngrok-free.app/api/services?page=1",
+                "label": "1",
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "Next &raquo;",
+                "active": false
+            }
+        ],
+        "path": "http://bluejay-pretty-clearly.ngrok-free.app/api/services",
+        "per_page": 10,
+        "to": 2,
+        "total": 2
+    }
+}
+```
+- **Пример ответа (ошибка)**:
+- (Если услуг по выбранному фильтру нет, то пользователь получит пустой список)
+```json
+{
+    "message": "Ошибка при получении данных"
+}
+```
+
+### GET /api/experts?search=петр&category=personal
+- **Описание**: Совмещенный фильтр.
+- **Параметры**:
+- **Авторизация**: Есть.
+
+- **Пример ответа (успех)**:
+```json
+{
+    "current_page": 1,
+    "data": [
+        {
+            "id": 1,
+            "user_id": 3,
+            "first_name": "Петр",
+            "last_name": "Брынчушкин",
+            "biography": "В детстве я очень любил наблюдать за тем, как бабушка пекет пирожки. Теперь я сам их пеку.",
+            "photo": "https://randomuser.me/api/portraits/men/17.jpg",
+            "experience": "10 лет уже пеку лучшие пирожки в городе.",
+            "education": "3 года в пекарно-кулинарном техникуме, а также у бабушки на каникулах.",
+            "rating": 0,
+            "created_at": "2025-05-05T18:15:18.000000Z",
+            "updated_at": "2025-05-05T18:15:18.000000Z",
+            "categories": [
+                {
+                    "id": 1,
+                    "title": "Личностный рост",
+                    "subtitle": "PersonalGrowth",
+                    "description": "(цели, дисциплина, продуктивность)",
+                    "created_at": "2025-05-07T08:34:27.000000Z",
+                    "updated_at": "2025-05-07T08:34:27.000000Z",
+                    "pivot": {
+                        "expert_id": 1,
+                        "category_id": 1
+                    }
+                }
+            ]
+        }
+    ],
+    "first_page_url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts?page=1",
+    "from": 1,
+    "last_page": 1,
+    "last_page_url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts?page=1",
+    "links": [
+        {
+            "url": null,
+            "label": "&laquo; Previous",
+            "active": false
+        },
+        {
+            "url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts?page=1",
+            "label": "1",
+            "active": true
+        },
+        {
+            "url": null,
+            "label": "Next &raquo;",
+            "active": false
+        }
+    ],
+    "next_page_url": null,
+    "path": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts",
+    "per_page": 10,
+    "prev_page_url": null,
+    "to": 1,
+    "total": 1
+}
+```
+- **Пример ответа (ошибка)**:
+- (Если экспертов по выбранным фильтрам нет, то пользователь получит пустой список)
+```json
+{
+    "message": "Ошибка при получении данных"
+}
+```
