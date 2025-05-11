@@ -59,6 +59,7 @@ Route::middleware(['jwt.verify'])->group(function () {
 
     Route::get('/my-available-slots', [ExpertsScheduleController::class, 'getMySchedule'])->name('experts-schedule.getMySchedule');
     Route::post('/my-available-slots', [ExpertsScheduleController::class, 'store'])->name('experts-schedule.store');
+    Route::delete('/my-available-slots', [ExpertsScheduleController::class, 'destroy'])->name('experts-schedule.delete');
 });
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle'])->middleware('fix_telegraph_bot');
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);

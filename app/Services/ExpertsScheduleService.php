@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Models\Expert;
+use App\Models\ExpertsSchedule;
 use App\Repositories\ExpertRepository;
 use App\Repositories\ExpertsScheduleRepository;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
 
 class ExpertsScheduleService
 {
@@ -29,11 +31,18 @@ class ExpertsScheduleService
             \Log::error('User is not expert', ['user_id' => auth()->id()]);
             throw new HttpResponseException(response()->json([
                 'message' => 'Вы не являетесь экспертом.'
-            ], 403));
+            ], Response::HTTP_FORBIDDEN));
         }
 
-        $expertId = Expert::where('user_id', auth()->id())->first()->id;
-        return $this->expertsScheduleRepository->getMySchedule($expertId);
+        $expert = Expert::where('user_id', auth()->id())->first();
+        if (!$expert) {
+            \Log::error('User is not expert', ['user_id' => auth()->id()]);
+            throw new HttpResponseException(response()->json([
+                'message' => 'Эксперт не найден.'
+            ], Response::HTTP_NOT_FOUND));
+        }
+
+        return $this->expertsScheduleRepository->getMySchedule($expert->id);
     }
 
     public function store(array $data)
@@ -42,12 +51,33 @@ class ExpertsScheduleService
             \Log::error('User has not expert');
             throw new HttpResponseException(response()->json([
                 'message' => 'Вы не являетесь экспертом.'
-            ], 403));
+            ], Response::HTTP_FORBIDDEN));
         }
 
         $expert = $this->expertRepository->getExpertByUserId(auth()->id());
         $data['expert_id'] = $expert->id;
 
         return $this->expertsScheduleRepository->create($data);
+    }
+
+    public function delete(int $id)
+    {
+        $expert  = $this->expertRepository->getExpertByUserId(auth()->id());
+        $slot = ExpertsSchedule::find($id);
+        if (!$slot) {
+            \Log::error('Slot not found.');
+            throw new HttpResponseException(response()->json([
+                'message' => 'Слот не найден.'
+            ], Response::HTTP_NOT_FOUND));
+        }
+
+        if (!$expert || $slot->expert_id !== $expert->id) {
+            \Log::error('User has not expert or access denied');
+            throw new HttpResponseException(response()->json([
+                'message' => 'Вы не являетесь экспертом или не имеете доступ к этому действию.'
+            ], Response::HTTP_FORBIDDEN));
+        }
+
+        return $this->expertsScheduleRepository->delete($slot);
     }
 }

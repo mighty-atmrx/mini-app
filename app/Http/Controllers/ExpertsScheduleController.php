@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response;
 
 class ExpertsScheduleController extends Controller
 {
@@ -22,12 +23,12 @@ class ExpertsScheduleController extends Controller
         \Log::info('getMySchedule method received');
         $schedule = $this->expertsScheduleService->getMySchedule();
         \Log::info('Expert Schedule was received');
-        return response()->json($schedule);
+        return response()->json($schedule, Response::HTTP_OK);
     }
 
     public function store(Request $request)
     {
-        \Log::info('store method received');
+        \Log::info('Store expert schedule method received');
 
         DB::beginTransaction();
         try {
@@ -39,8 +40,10 @@ class ExpertsScheduleController extends Controller
             $data['date'] = Carbon::createFromFormat('d.m.Y', $data['date'])->format('Y-m-d');
 
             foreach ($data['time'] as $time) {
-                $data['time'] = $time;
-                $this->expertsScheduleService->store($data);
+                $this->expertsScheduleService->store([
+                    'date' => $data['date'],
+                    'time' => $time,
+                ]);
             }
             DB::commit();
             return response()->json([
@@ -54,7 +57,32 @@ class ExpertsScheduleController extends Controller
             \Log::error('Store error', ['error' => $e->getMessage()]);
             return response()->json([
                 'message' => 'Не удалось сохранить график.'
-            ], 500);
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function destroy(Request $request)
+    {
+        \Log::info('Destroy available slot method received');
+        $data = $request->validate(['slot_id' => 'required|integer']);
+
+        DB::beginTransaction();
+        try {
+            $this->expertsScheduleService->delete($data['slot_id']);
+            DB::commit();
+            \Log::info('An expert removed an available slot.');
+            return response()->json([
+                'message' => 'Slot removed successfully.'
+            ], Response::HTTP_OK);
+        } catch (HttpResponseException $e) {
+            DB::rollBack();
+            throw $e;
+        }catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Delete available slot error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Не удалось удалить слот.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

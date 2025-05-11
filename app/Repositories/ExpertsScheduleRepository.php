@@ -8,11 +8,16 @@ class ExpertsScheduleRepository
 {
     public function getMySchedule($expertId)
     {
-        return ExpertsSchedule::where('expert_id', $expertId)->get();
+        return ExpertsSchedule::where('expert_id', $expertId)->orderBy('date')->get();
     }
 
     public function create(array $data)
     {
         return ExpertsSchedule::create($data);
+    }
+
+    public function delete(ExpertsSchedule $slot)
+    {
+        return $slot->deleteOrFail();
     }
 }
