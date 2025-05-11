@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ExpertsScheduleController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ExpertController;
@@ -54,6 +55,10 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
     Route::post('/favorites', [FavoriteController::class, 'store'])->name('favorites.store');
     Route::delete('/favorites', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
+
+
+    Route::get('/my-available-slots', [ExpertsScheduleController::class, 'getMySchedule'])->name('experts-schedule.getMySchedule');
+    Route::post('/my-available-slots', [ExpertsScheduleController::class, 'store'])->name('experts-schedule.store');
 });
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle'])->middleware('fix_telegraph_bot');
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);

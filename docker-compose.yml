@@ -16,6 +16,7 @@ services:
             - ./storage:/var/www/storage
             - ./public/index.php:/var/www/public/index.php
             - ./public/.htaccess:/var/www/public/.htaccess
+            - ./public/miniapp.html:/var/www/public/miniapp.html
         networks:
             -   app-network
         depends_on:
