@@ -59,4 +59,9 @@ class User extends Authenticatable implements JWTSubject
             'first_name' => $this->first_name
         ];
     }
+
+    public function favorites()
+    {
+        return $this->belongsToMany(Expert::class, 'favorites', 'user_id', 'expert_id');
+    }
 }

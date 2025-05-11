@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ExpertController;
 use App\Http\Controllers\TelegramAuthController;
@@ -49,9 +50,14 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::post('/services', [ServiceController::class, 'store'])->middleware('ensure.expert')->name('service.store');
     Route::patch('/services/{serviceId}', [ServiceController::class, 'updateService'])->middleware('ensure.expert')->name('service.update');
     Route::delete('/services/{serviceId}', [ServiceController::class, 'deleteService'])->name('service.delete');
+
+    Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+    Route::post('/favorites', [FavoriteController::class, 'store'])->name('favorites.store');
+    Route::delete('/favorites', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
 });
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle'])->middleware('fix_telegraph_bot');
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);
 Route::post('auth/telegram/refresh', [TelegramAuthController::class, 'refresh']);
 
 Route::post('/users', [UserController::class, 'store'])->name('user.store');
+

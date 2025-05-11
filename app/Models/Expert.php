@@ -32,6 +32,11 @@ class Expert extends Model
         return $value ? url($value) : null;
     }
 
+    public function favoritedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'favorites', 'expert_id', 'user_id');
+    }
+
     public function reviews()
     {
         return $this->hasMany(Review::class);
