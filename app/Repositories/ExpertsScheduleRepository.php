@@ -6,7 +6,7 @@ use App\Models\ExpertsSchedule;
 
 class ExpertsScheduleRepository
 {
-    public function getMySchedule($expertId)
+    public function getExpertSchedule(int $expertId)
     {
         return ExpertsSchedule::where('expert_id', $expertId)->orderBy('date')->get();
     }

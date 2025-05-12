@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('expert_id')->constrained('experts');
-            $table->foreignId('service_id')->constrained('services');
-            $table->foreignId('user_id')->constrained('users');
+            $table->unsignedBigInteger('expert_id');
+            $table->foreign('expert_id')->references('id')->on('experts');
+            $table->unsignedBigInteger('service_id');
+            $table->foreign('service_id')->references('id')->on('services');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
             $table->date('date');
             $table->time('time');
-            $table->enum('status', ['waiting', 'paid', 'rejected', 'completed', 'failed'])->default('waiting');
+            $table->enum('status', ['payment', 'paid', 'completed', 'failed'])->default('payment');
             $table->timestamps();
         });
     }

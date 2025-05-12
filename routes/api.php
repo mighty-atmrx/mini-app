@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ExpertsScheduleController;
 use App\Http\Controllers\FavoriteController;
@@ -60,6 +61,9 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::get('/my-available-slots', [ExpertsScheduleController::class, 'getMySchedule'])->name('experts-schedule.getMySchedule');
     Route::post('/my-available-slots', [ExpertsScheduleController::class, 'store'])->name('experts-schedule.store');
     Route::delete('/my-available-slots', [ExpertsScheduleController::class, 'destroy'])->name('experts-schedule.delete');
+
+    Route::get('/bookings/available/{expertId}', [BookingController::class, 'getAvailableBookings'])->name('bookings.get-available-bookings');
+    Route::post('/bookings/', [BookingController::class, 'store'])->name('bookings.store');
 });
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle'])->middleware('fix_telegraph_bot');
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);

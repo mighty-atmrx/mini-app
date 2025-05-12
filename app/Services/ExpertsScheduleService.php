@@ -42,7 +42,7 @@ class ExpertsScheduleService
             ], Response::HTTP_NOT_FOUND));
         }
 
-        return $this->expertsScheduleRepository->getMySchedule($expert->id);
+        return $this->expertsScheduleRepository->getExpertSchedule($expert->id);
     }
 
     public function store(array $data)
