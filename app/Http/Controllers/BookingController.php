@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\BookingService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class BookingController extends Controller
@@ -30,13 +31,42 @@ class BookingController extends Controller
                 'error' => $e->getMessage()
             ]);
             return response()->json([
-                'message' => 'Failed to get available bookings for expert appointment.'
+                'message' => 'Не удалось получить свободные места для записи к специалисту.'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $serviceId)
     {
+        \Log::info('Store method in BookingController received.');
+        DB::beginTransaction();
+        try {
+            $data = $request->validate([
+                'date' => 'required|date_format:d.m.Y',
+                'time' => 'required|date_format:H:i',
+            ]);
+            $data['service_id'] = $serviceId;
 
+            $booking = $this->bookingService->store($data);
+            DB::commit();
+
+            \Log::info('Booking added successfully.', [
+                'booking' => $booking
+            ]);
+            return response()->json([
+                'message' => 'Запись к эксперту успешно создана.',
+                'date' => $booking->date,
+                'time' => $booking->time
+            ]);
+        } catch (HttpResponseException $e) {
+            DB::rollBack();
+            throw $e;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Store booking error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Не удалось создать запись к эксперту.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

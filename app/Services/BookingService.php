@@ -2,22 +2,33 @@
 
 namespace App\Services;
 
+use App\Models\Booking;
+use App\Repositories\BookingRepository;
 use App\Repositories\ExpertRepository;
 use App\Repositories\ExpertsScheduleRepository;
+use App\Repositories\ServiceRepository;
+use Carbon\Carbon;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class BookingService
 {
     protected $expertScheduleRepository;
     protected $expertRepository;
+    protected $serviceRepository;
+    protected $bookingRepository;
 
     public function __construct(
         ExpertsScheduleRepository $expertScheduleRepository,
         ExpertRepository $expertRepository,
+        ServiceRepository $serviceRepository,
+        BookingRepository $bookingRepository,
     ){
         $this->expertScheduleRepository = $expertScheduleRepository;
         $this->expertRepository = $expertRepository;
+        $this->serviceRepository = $serviceRepository;
+        $this->bookingRepository = $bookingRepository;
     }
 
     public function getExpertAvailableBookings(int $expertId)
@@ -42,5 +53,58 @@ class BookingService
 
         \Log::info('Available bookings found.');
         return $bookings;
+    }
+
+    public function store(array $data)
+    {
+        $service = $this->serviceRepository->getServiceById($data['service_id']);
+        if (!$service) {
+            \Log::error('Service not found with id ' . $data['service_id']);
+            throw new HttpResponseException(response()->json([
+                'message' => 'Service not found.'
+            ], Response::HTTP_NOT_FOUND));
+        }
+
+        $expert =  $this->expertRepository->getExpertById($service->expert_id);
+        if (!$expert) {
+            \Log::error('Expert not found with id ' . $data['expert_id']);
+            throw new HttpResponseException(response()->json([
+                'message' => 'Expert not found.'
+            ], Response::HTTP_NOT_FOUND));
+        }
+
+        $slot = DB::table('experts_schedules')
+            ->where('expert_id', $expert->id)
+            ->where('date', $data['date'])
+            ->where('time', $data['time'])
+            ->lockForUpdate()
+            ->first();
+
+        if (!$slot) {
+            \Log::error('Slot not found with data or already occupied.');
+            throw new HttpResponseException(response()->json([
+                'message' => 'Слот не найден или уже занят.'
+            ], Response::HTTP_CONFLICT));
+        }
+
+        $exists = Booking::where('expert_id', $expert->id)
+            ->where('date', $data['date'])
+            ->where('time', $data['time'])
+            ->whereIn('status', ['payment', 'paid'])
+            ->exists();
+
+        if ($exists) {
+            \Log::error('Slot is already booked.');
+            throw new HttpResponseException(response()->json([
+                'message' => 'Слот уже занят.'
+            ], Response::HTTP_CONFLICT));
+        }
+
+
+        $data['date'] = Carbon::createFromFormat('d.m.Y', $data['date'])->format('Y-m-d');
+        $data['expert_id'] = $expert->id;
+        $data['user_id'] = auth()->id();
+
+        return $this->bookingRepository->create($data);
     }
 }

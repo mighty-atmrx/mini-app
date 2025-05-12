@@ -28,7 +28,7 @@ class  ServiceRepository
 
     public function getServiceById(int $serviceId): ?Service
     {
-        return $this->model->findOfFail($serviceId);
+        return $this->model->findOrFail($serviceId);
     }
 
     public function create(array $data): Service

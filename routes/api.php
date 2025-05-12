@@ -49,6 +49,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::get('/favorites/experts', [ExpertController::class, 'getExpertsData'])->name('experts.favorites');
 
     Route::get('/services', [ServiceController::class, 'index'])->name('service.index');
+    Route::get('/services/{serviceId}', [ServiceController::class, 'getParticularService'])->name('service.get_particular_service');
     Route::post('/services', [ServiceController::class, 'store'])->middleware('ensure.expert')->name('service.store');
     Route::patch('/services/{serviceId}', [ServiceController::class, 'updateService'])->middleware('ensure.expert')->name('service.update');
     Route::delete('/services/{serviceId}', [ServiceController::class, 'deleteService'])->name('service.delete');
@@ -63,7 +64,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::delete('/my-available-slots', [ExpertsScheduleController::class, 'destroy'])->name('experts-schedule.delete');
 
     Route::get('/bookings/available/{expertId}', [BookingController::class, 'getAvailableBookings'])->name('bookings.get-available-bookings');
-    Route::post('/bookings/', [BookingController::class, 'store'])->name('bookings.store');
+    Route::post('/services/{serviceId}/bookings', [BookingController::class, 'store'])->name('bookings.store');
 });
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle'])->middleware('fix_telegraph_bot');
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);

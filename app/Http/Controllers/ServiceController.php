@@ -45,6 +45,21 @@ class ServiceController extends Controller
         }
     }
 
+    public function getParticularService($serviceId)
+    {
+        \Log::info('Get particular service method received.');
+        try {
+            $service = $this->serviceRepository->getServiceById($serviceId);
+            return response()->json($service);
+        } catch (\Exception $e) {
+            \Log::error('Get particular service error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Ошибка при получении данных об услуге.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
     public function getExpertServices(int $expertId)
     {
         try {
