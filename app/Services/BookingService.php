@@ -101,7 +101,6 @@ class BookingService
         }
 
 
-        $data['date'] = Carbon::createFromFormat('d.m.Y', $data['date'])->format('Y-m-d');
         $data['expert_id'] = $expert->id;
         $data['user_id'] = auth()->id();
 

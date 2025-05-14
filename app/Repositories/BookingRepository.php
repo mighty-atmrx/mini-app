@@ -10,4 +10,20 @@ class BookingRepository
     {
         return Booking::create($data);
     }
+
+    public function userIsClientForThisExpert(int $expertId, int $userId): bool
+    {
+        return Booking::where('expert_id', $expertId)
+            ->where('user_id', $userId)
+            ->where('status', 'completed')
+            ->exists();
+    }
+
+    public function userCountBookingsForThisExpert(int $expertId, int $userId): int
+    {
+        return Booking::where('expert_id', $expertId)
+            ->where('user_id', $userId)
+            ->count();
+    }
+
 }

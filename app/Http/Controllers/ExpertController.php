@@ -7,7 +7,9 @@ use App\Http\Requests\Expert\StoreExpertRequest;
 use App\Http\Requests\Expert\UpdateExpertRequest;
 use App\Http\Requests\FilterRequest;
 use App\Models\ExpertCategory;
+use App\Repositories\BookingRepository;
 use App\Repositories\ExpertRepository;
+use App\Repositories\ExpertReviewsRepository;
 use App\Repositories\UserRepository;
 use App\Services\ExpertService;
 use Illuminate\Http\Request;
@@ -20,17 +22,23 @@ class ExpertController extends Controller
     protected $expertCategory;
     protected $expertService;
     protected $userRepository;
+    protected $expertReviewsRepository;
+    protected $bookingRepository;
 
     public function __construct(
         ExpertRepository $expertRepository,
         ExpertCategory $expertCategory,
         ExpertService $expertService,
         UserRepository $userRepository,
+        ExpertReviewsRepository $expertReviewsRepository,
+        BookingRepository $bookingRepository,
     ){
         $this->expertRepository = $expertRepository;
         $this->expertCategory = $expertCategory;
         $this->expertService = $expertService;
         $this->userRepository = $userRepository;
+        $this->expertReviewsRepository = $expertReviewsRepository;
+        $this->bookingRepository = $bookingRepository;
     }
 
     public function index(FilterRequest $request)
@@ -53,9 +61,23 @@ class ExpertController extends Controller
 
         $reviews = $expert->reviews()->with('user')->paginate(5);
 
+        $userReviewsForThisExpert = $this->expertReviewsRepository
+            ->userReviewsForThisExpert($expertId, auth()->id());
+
+        $userCountBookingsOfThisExpert = $this->bookingRepository
+            ->userCountBookingsForThisExpert($expertId, auth()->id());
+
+        if ($userCountBookingsOfThisExpert > $userReviewsForThisExpert){
+            $userCanLeaveReview = true;
+        } else {
+            $userCanLeaveReview = false;
+        }
+
+
         return response()->json([
             'expert' => $expert,
-            'reviews' => $reviews
+            'reviews' => $reviews,
+            'userCanLeaveReview' => $userCanLeaveReview,
         ]);
     }
 

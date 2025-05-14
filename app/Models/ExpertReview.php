@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Review extends Model
+class ExpertReview extends Model
 {
-    protected $table = 'reviews';
+    protected $table = 'expert_reviews';
 
     protected $fillable = ['user_id', 'expert_id', 'rating', 'comment'];
 

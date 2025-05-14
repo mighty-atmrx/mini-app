@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reviews', function (Blueprint $table) {
+        Schema::create('expert_reviews', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
@@ -20,7 +20,7 @@ return new class extends Migration
 
             $table->float('rating', 2, 1);
 
-            $table->text('comment');
+            $table->text('comment')->nullable();
 
             $table->timestamps();
         });

@@ -29,7 +29,6 @@ class Handler extends WebhookHandler
 
     public function start(): void
     {
-        \Log::info('1111');
         \Log::info('Start method triggered', ['telegram_id' => $this->chat->chat_id]);
 
         if (!$this->chat) {

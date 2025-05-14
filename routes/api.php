@@ -4,6 +4,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ExpertsScheduleController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ExpertController;
 use App\Http\Controllers\TelegramAuthController;
@@ -65,6 +66,8 @@ Route::middleware(['jwt.verify'])->group(function () {
 
     Route::get('/bookings/available/{expertId}', [BookingController::class, 'getAvailableBookings'])->name('bookings.get-available-bookings');
     Route::post('/services/{serviceId}/bookings', [BookingController::class, 'store'])->name('bookings.store');
+
+    Route::post('/experts/{expertId}', [ReviewController::class, 'storeReviewForExpert'])->name('expert_review.store');
 });
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle'])->middleware('fix_telegraph_bot');
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);

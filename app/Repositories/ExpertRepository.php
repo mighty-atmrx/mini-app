@@ -49,4 +49,11 @@ class ExpertRepository
         $expert->update($data);
         return $expert;
     }
+
+    public function updateExpertRating(Expert $expert, float $rating)
+    {
+        $expert->rating = $rating;
+        $expert->save();
+        return $expert;
+    }
 }

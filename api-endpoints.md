@@ -200,29 +200,86 @@
 - **Пример ответа (успех)**:
   ```json
   {
-    "id": 1,
-    "user_id": 8,
-    "first_name": "Василий",
-    "last_name": "Васильев",
-    "biography": "Пеку пирожки",
-    "photo": "http://bluejay-pretty-clearly.ngrok-free.app/storage/experts/rzfvNy5xSb4AsEhdweR7joKinrU55vGatcaBuWz0.jpg",
-    "experience": "10 лет учу печь пирожки",
-    "education": "3 года учился у бабушки печь пирожки",
-    "created_at": "2025-04-28T19:21:28.000000Z",
-    "updated_at": "2025-04-28T19:21:28.000000Z",
-    "categories": [
-        {
-            "id": 2,
-            "category": "Психология и коучинг",
-            "description": "(самооценка, уверенность, страхи)",
-            "created_at": "2025-04-28T19:32:43.000000Z",
-            "updated_at": "2025-04-28T19:32:43.000000Z",
-            "pivot": {
-                "expert_id": 1,
-                "category_id": 2
+    "expert": {
+        "id": 3,
+        "user_id": 6,
+        "first_name": "Артём",
+        "last_name": "Андреев",
+        "biography": "Пеку вафли",
+        "photo": "http://bluejay-pretty-clearly.ngrok-free.app/storage/experts/5OZcpJSkjEVEiRF8ovBAb1WiaSxlIxarL9aSzBEe.jpg",
+        "experience": "5 лет пеку вафли",
+        "education": "3 года учился на фабрике печь вафли",
+        "rating": 4.6666666666667,
+        "created_at": "2025-05-14T15:53:54.000000Z",
+        "updated_at": "2025-05-14T19:17:19.000000Z",
+        "categories": [
+            {
+                "id": 1,
+                "title": "Личностный рост",
+                "subtitle": "PersonalGrowth",
+                "description": "(цели, дисциплина, продуктивность)",
+                "created_at": "2025-05-14T14:22:26.000000Z",
+                "updated_at": "2025-05-14T14:22:26.000000Z",
+                "pivot": {
+                    "expert_id": 3,
+                    "category_id": 1
+                }
             }
-        }
-    ]
+        ]
+    },
+    "reviews": {
+        "current_page": 1,
+        "data": [
+            {
+                "id": 10,
+                "user_id": 6,
+                "expert_id": 3,
+                "rating": 5,
+                "comment": "Всем рекомендую этого эксперта",
+                "created_at": "2025-05-14T19:17:19.000000Z",
+                "updated_at": "2025-05-14T19:17:19.000000Z",
+                "user": {
+                    "id": 6,
+                    "telegram_user_id": "022fa23553d83706e263cd6600d64574c8ffdad0b6d30f40a1260c12307897ff",
+                    "first_name": "Артём",
+                    "last_name": "",
+                    "birthdate": "2001-01-01",
+                    "phone": "+77084354345",
+                    "role": "expert",
+                    "created_at": "2025-05-14T15:43:03.000000Z",
+                    "updated_at": "2025-05-14T15:53:54.000000Z"
+                }
+            }
+        ],
+        "first_page_url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts/3?page=1",
+        "from": 1,
+        "last_page": 1,
+        "last_page_url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts/3?page=1",
+        "links": [
+            {
+                "url": null,
+                "label": "&laquo; Previous",
+                "active": false
+            },
+            {
+                "url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts/3?page=1",
+                "label": "1",
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "Next &raquo;",
+                "active": false
+            }
+        ],
+        "next_page_url": null,
+        "path": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts/3",
+        "per_page": 5,
+        "prev_page_url": null,
+        "to": 3,
+        "total": 3
+    },
+    "userCanLeaveReview": false
   }
   ```
 - **Пример ответа (ошибка)**:
@@ -1175,5 +1232,32 @@
 ```json
 {
     "message": "Не удалось создать запись к эксперту."
+}
+```
+
+
+### Отзывы
+### POST /api/experts/{expertId}
+- **Описание**: Пользователь оставляет отзыв об эксперте(если он уже оставил или количество пройденных курсов у эксперта = кол-ву оставленных отзывов данного пользователя, то пользователь не сможет оставить отзыв).
+- **Параметры**:
+    - expertId (integer)
+- **Авторизация**: Есть.
+- **Пример запроса**:
+```json
+{
+    "rating": 5,
+    "comment": "Всем рекомендую этого эксперта"
+}
+```
+- **Пример ответа (успех)**:
+```json
+{
+    "message": "Отзыв об эксперт был успешно опубликован."
+}
+```
+- **Пример ответа (ошибка)**:
+```json
+{
+    "message": "Вы уже оставили отзыв данному эксперту."
 }
 ```

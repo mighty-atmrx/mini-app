@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\BookingService;
+use Carbon\Carbon;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -46,6 +47,7 @@ class BookingController extends Controller
                 'time' => 'required|date_format:H:i',
             ]);
             $data['service_id'] = $serviceId;
+            $data['date'] = Carbon::createFromFormat('d.m.Y', $data['date'])->format('Y-m-d');
 
             $booking = $this->bookingService->store($data);
             DB::commit();
