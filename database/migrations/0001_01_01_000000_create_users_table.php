@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('birthdate');
             $table->string('phone');
             $table->enum('role', ['user', 'expert', 'admin'])->default('user');
+            $table->float('rating', 2)->default(0);
             $table->timestamps();
         });
 

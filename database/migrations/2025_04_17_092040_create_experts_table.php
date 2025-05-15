@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('photo');
             $table->text('experience');
             $table->text('education');
-            $table->float('rating')->default(0);
+            $table->float('rating', 2)->default(0);
             $table->timestamps();
         });
     }

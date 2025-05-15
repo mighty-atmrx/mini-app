@@ -22,12 +22,16 @@ class PhoneManualState implements RegistrationState
         $phone = $input->toString();
         \Log::info('Phone received manually', ['telegram_id' => $chat->chat_id, 'phone' => $phone]);
 
+        $userData = $this->stateManager->getUserData($chat);
+        $userData['last_attempted_phone'] = $phone;
+        $this->stateManager->setUserData($chat, $userData);
+
         if (!InputValidator::validatePhone($phone)) {
-            $chat->message('Неверный формат телефона. Попробуй ещё раз (например, +79991234567).')
+            $chat->message('Неверный формат телефона. Попробуй ещё раз (например, +77007073355).')
                 ->replyKeyboard(KeyboardFactory::makeEmptyKeyboard())
                 ->send();
             \Log::info('Invalid phone rejected', ['telegram_id' => $chat->chat_id, 'phone' => $phone]);
-            return $this;
+            return null;
         }
 
         $userData = $this->stateManager->getUserData($chat);
@@ -45,7 +49,7 @@ class PhoneManualState implements RegistrationState
 
     public function prompt(TelegraphChat $chat): void
     {
-        $chat->message('Пожалуйста, введи свой номер телефона (например, +79991234567).')
+        $chat->message('Пожалуйста, введи свой номер телефона (например, +77007073355).')
             ->replyKeyboard(KeyboardFactory::makeEmptyKeyboard())
             ->send();
         \Log::info('Manual phone request sent', ['telegram_id' => $chat->chat_id]);

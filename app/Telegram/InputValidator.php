@@ -11,7 +11,7 @@ class InputValidator
 
     public static function validatePhone(string $phone): bool
     {
-        return preg_match('/^\+?\d{10,15}$/', $phone);
+        return preg_match('/^\+7?\d{10}$/', $phone) === 1;
     }
 
     public static function validateBirthdate(string $birthdate): bool

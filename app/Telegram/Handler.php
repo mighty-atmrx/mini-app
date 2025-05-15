@@ -132,9 +132,27 @@ class Handler extends WebhookHandler
         $nextState = $state->handle($this->chat, $text, $this->message);
 
         if ($nextState) {
+            \Log::info('Calling prompt for next state', ['next_step' => $stateManager->getStep($this->chat)]);
             $nextState->prompt($this->chat);
         } else {
+            \Log::info('No next state, checking user data');
             $userData = $stateManager->getUserData($this->chat);
+
+            if (!isset($userData['first_name'], $userData['phone'], $userData['birthdate'])) {
+                \Log::warning('Incomplete user data, registration not completed', [
+                    'telegram_id' => $this->chat->chat_id,
+                    'user_data' => $userData,
+                ]);
+
+                if (isset($userData['last_attempted_phone']) && $text->toString() === $userData['last_attempted_phone']) {
+                    \Log::info('Validation error message already sent, skipping prompt');
+                    return;
+                }
+
+                $state->prompt($this->chat);
+                return;
+            }
+
             try {
                 $user = DB::transaction(function () use ($userData) {
                     $user = $this->userService->userCreate($userData, $this->chat->chat_id);
