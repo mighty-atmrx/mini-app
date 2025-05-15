@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Repositories\BookingRepository;
+use App\Repositories\ExpertRepository;
 use App\Repositories\UserRepository;
+use App\Repositories\UserReviewsRepository;
 use App\Services\UserService;
 use App\Telegram\InputValidator;
 use Illuminate\Http\Request;
@@ -16,13 +19,22 @@ class UserController extends Controller
 {
     protected $userRepository;
     protected $userService;
+    protected $expertRepository;
+    protected $bookingRepository;
+    protected $userReviewsRepository;
 
     public function __construct(
         UserRepository $userRepository,
-        UserService $userService
+        UserService $userService,
+        ExpertRepository $expertRepository,
+        BookingRepository $bookingRepository,
+        UserReviewsRepository $userReviewsRepository,
     ){
         $this->userService = $userService;
         $this->userRepository = $userRepository;
+        $this->expertRepository = $expertRepository;
+        $this->bookingRepository = $bookingRepository;
+        $this->userReviewsRepository = $userReviewsRepository;
     }
 
     public function store(Request $request)
@@ -54,13 +66,11 @@ class UserController extends Controller
         }
     }
 
-    public function show(Request $request, $userTelegramId)
+    public function show(int $userId)
     {
-        $hashedTelegramId = hash('sha256', (string)$userTelegramId);
-
-        $user = $this->userRepository->findByTelegramId($hashedTelegramId);
+        $user = $this->userRepository->findUserById($userId);
         if (!$user) {
-            \Log::error('User not found', ['telegram_id' => $userTelegramId]);
+            \Log::error('User not found', ['userId' => $userId]);
             return response()->json(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
 
@@ -74,5 +84,46 @@ class UserController extends Controller
             return response()->json(['error' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
         }
         return response()->json($user);
+    }
+
+    public function getUserById(int $userId)
+    {
+        \Log::info('getUserById method received.');
+        $user = $this->userRepository->findUserById($userId);
+        if (!$user) {
+            \Log::error('User not found with id ' . $userId);
+            return response()->json([
+                'message' => 'User not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $expert = $this->expertRepository->getExpertByUserId(auth()->id());
+        if (!$expert) {
+            \Log::error('Expert not found with user id ' . auth()->id());
+            return response()->json([
+                'message' => 'Expert not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $reviews = $user->reviews()->with('user')->paginate(5);
+
+        $userCountBookingsForThisExpert = $this->bookingRepository
+            ->userCountBookingsForThisExpert($expert->id, $userId);
+
+        $expertReviewsForThisUser = $this->userReviewsRepository
+            ->expertReviewsForThisUser($expert->id, $userId);
+
+        if ($userCountBookingsForThisExpert > $expertReviewsForThisUser) {
+            $expertCanLeaveReview = true;
+        } else {
+            $expertCanLeaveReview = false;
+        }
+
+        \Log::info('User found', ['user' => $user]);
+        return response()->json([
+            'user' => $user,
+            'reviews' => $reviews,
+            'expertCanLeaveReview' => $expertCanLeaveReview,
+        ]);
     }
 }

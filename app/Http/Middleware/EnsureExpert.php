@@ -26,7 +26,7 @@ class EnsureExpert
         if (!auth()->check() || auth()->user()->role !== 'expert' || !$expert) {
             \Log::error('Expert not found', ['user_id' => $userId]);
             return response()->json([
-                'message' => 'Expert not found'
+                'message' => 'Expert not found or access denied.'
             ], Response::HTTP_NOT_FOUND);
         }
 

@@ -14,6 +14,11 @@ class UserRepository
         return User::where('telegram_user_id', $telegramId)->first();
     }
 
+    public function findUserById(int $userId): ?User
+    {
+        return User::findOrFail($userId);
+    }
+
     public function save(array $data, string $hashedTelegramId): User
     {
         \Log::info('Saving user with telegram_id', [
@@ -48,5 +53,12 @@ class UserRepository
         $user = User::findOrFail($userId);
         $user->role = $role;
         $user->saveOrFail();
+    }
+
+    public function updateUserRating(User $user, float $rating)
+    {
+        $user->rating = $rating;
+        $user->saveOrFail();
+        return $user;
     }
 }

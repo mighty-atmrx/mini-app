@@ -55,10 +55,10 @@
   }
   ```
 
-### GET /api/users/{telegram_id}
-- **Описание**: Получение данных пользователя по Telegram ID.
+### GET /api/profile/{userId}
+- **Описание**: Пользователь может зайти в свой профиль(кроме него больше никто не может зайти) и получить свои данные.
 - **Параметры**:
-  - `telegram_id` (string, required): Telegram ID пользователя.
+  - `userId` (integer, required): ID пользователя.
 - **Авторизация**: Требуется (JWT-токен в заголовке `Authorization: Bearer <token>`).
 - **Пример ответа (успех)**:
   ```json
@@ -77,6 +77,113 @@
   {
       "error": "Unauthorized",
       "code": "invalid_token"
+  }
+  ```
+
+### GET /api/users/{userId}
+- **Описание**: Получение данных текущего пользователя.
+- **Параметры**: Нет.
+- **Авторизация**: 
+- Требуется (JWT-токен в заголовке `Authorization: Bearer <token>`) 
+- Получить может только эксперт и админ.
+- Другие пользователи не имеют доступ к этому действию.
+- **Пример ответа (успех)**:
+  ```json
+  {
+    "user": {
+        "id": 6,
+        "telegram_user_id": "022fa23553d83706e263cd6600d64574c8ffdad0b6d30f40a1260c12307897ff",
+        "first_name": "Артём",
+        "last_name": "",
+        "birthdate": "1002-02-01",
+        "phone": "+7083458877",
+        "role": "expert",
+        "rating": 4.5,
+        "created_at": "2025-05-15T11:04:11.000000Z",
+        "updated_at": "2025-05-15T19:21:32.000000Z"
+    },
+    "reviews": {
+        "current_page": 1,
+        "data": [
+            {
+                "id": 1,
+                "expert_id": 3,
+                "user_id": 6,
+                "rating": 4,
+                "comment": "Очень приятно было иметь дело с этим пользователем",
+                "created_at": "2025-05-15T19:15:05.000000Z",
+                "updated_at": "2025-05-15T19:15:05.000000Z",
+                "user": {
+                    "id": 6,
+                    "telegram_user_id": "022fa23553d83706e263cd6600d64574c8ffdad0b6d30f40a1260c12307897ff",
+                    "first_name": "Артём",
+                    "last_name": "",
+                    "birthdate": "1002-02-01",
+                    "phone": "+7083458877",
+                    "role": "expert",
+                    "rating": 4.5,
+                    "created_at": "2025-05-15T11:04:11.000000Z",
+                    "updated_at": "2025-05-15T19:21:32.000000Z"
+                }
+            },
+            {
+                "id": 2,
+                "expert_id": 3,
+                "user_id": 6,
+                "rating": 5,
+                "comment": null,
+                "created_at": "2025-05-15T19:21:32.000000Z",
+                "updated_at": "2025-05-15T19:21:32.000000Z",
+                "user": {
+                    "id": 6,
+                    "telegram_user_id": "022fa23553d83706e263cd6600d64574c8ffdad0b6d30f40a1260c12307897ff",
+                    "first_name": "Артём",
+                    "last_name": "",
+                    "birthdate": "1002-02-01",
+                    "phone": "+7083458877",
+                    "role": "expert",
+                    "rating": 4.5,
+                    "created_at": "2025-05-15T11:04:11.000000Z",
+                    "updated_at": "2025-05-15T19:21:32.000000Z"
+                }
+            }
+        ],
+        "first_page_url": "http://bluejay-pretty-clearly.ngrok-free.app/api/users/6?page=1",
+        "from": 1,
+        "last_page": 1,
+        "last_page_url": "http://bluejay-pretty-clearly.ngrok-free.app/api/users/6?page=1",
+        "links": [
+            {
+                "url": null,
+                "label": "&laquo; Previous",
+                "active": false
+            },
+            {
+                "url": "http://bluejay-pretty-clearly.ngrok-free.app/api/users/6?page=1",
+                "label": "1",
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "Next &raquo;",
+                "active": false
+            }
+        ],
+        "next_page_url": null,
+        "path": "http://bluejay-pretty-clearly.ngrok-free.app/api/users/6",
+        "per_page": 5,
+        "prev_page_url": null,
+        "to": 2,
+        "total": 2
+    },
+    "expertCanLeaveReview": false
+  }
+  ```
+- **Пример ответа (ошибка)**:
+  ```json
+  {
+      "error": "Unauthorized",
+      "code": "no_user"
   }
   ```
 
@@ -1259,5 +1366,30 @@
 ```json
 {
     "message": "Вы уже оставили отзыв данному эксперту."
+}
+```
+
+### POST /api/users/{userId}
+- **Описание**: Эксперт оставляет отзыв об эксперте(если он уже оставил или количество пройденных курсов у эксперта = кол-ву оставленных отзывов данного пользователя, то пользователь не сможет оставить отзыв).
+- **Параметры**:
+    - userId (integer)
+- **Авторизация**: Есть.
+- **Пример запроса**:
+```json
+{
+    "rating": 5,
+    "comment": "Очень приятно работать с этим пользователем."
+}
+```
+- **Пример ответа (успех)**:
+```json
+{
+    "message": "Отзыв об пользователе успешно опубликован."
+}
+```
+- **Пример ответа (ошибка)**:
+```json
+{
+    "message": "Вы уже оставили отзыв данному пользователю."
 }
 ```

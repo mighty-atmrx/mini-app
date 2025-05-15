@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\ExpertRepository;
 use App\Repositories\ExpertReviewsRepository;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class ExpertService
 {
@@ -46,7 +47,9 @@ class ExpertService
         $expert = $this->expertRepository->getExpertById($expertId);
         if (!$expert) {
             \Log::error('Failed to find an expert when trying to update rating.');
-            throw new \Exception('Эксперт не найден.');
+            throw new HttpResponseException(response()->json([
+                'message' => 'Эксперт не найден.'
+            ]));
         }
 
         $expertsReviews = $this->expertReviewsRepository->getExpertReviews($expertId);

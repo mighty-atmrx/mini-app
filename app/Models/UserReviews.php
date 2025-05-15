@@ -11,4 +11,9 @@ class UserReviews extends Model
     protected $fillable = ['user_id', 'expert_id', 'rating', 'comment'];
 
     protected $dates = ['created_at', 'updated_at'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

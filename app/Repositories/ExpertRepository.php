@@ -53,7 +53,7 @@ class ExpertRepository
     public function updateExpertRating(Expert $expert, float $rating)
     {
         $expert->rating = $rating;
-        $expert->save();
+        $expert->saveOrFail();
         return $expert;
     }
 }
