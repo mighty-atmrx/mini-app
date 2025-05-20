@@ -5,16 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Expert;
 use App\Models\Favorite;
 use App\Repositories\ExpertRepository;
+use App\Services\FavoriteService;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class FavoriteController extends Controller
 {
     protected $expertRepository;
+    protected $favoriteService;
 
-    public function __construct(ExpertRepository $expertRepository)
-    {
+    public function __construct(
+        ExpertRepository $expertRepository,
+        FavoriteService $favoriteService
+    ){
         $this->expertRepository = $expertRepository;
+        $this->favoriteService = $favoriteService;
     }
 
     public function index()
@@ -44,19 +50,14 @@ class FavoriteController extends Controller
             $data['user_id'] = auth()->id();
             \Log::info('Favorite store method received', ['data' => $data]);
 
-            if (!Expert::find($data['expert_id'])) {
-                \Log::error('Expert not found with id: ' . $data['expert_id']);
-                return response()->json([
-                    'message' => 'Не удалось найти эксперта.'
-                ]);
-            }
-
-            Favorite::create($data);
+            $this->favoriteService->createFavorite($data);
             DB::commit();
 
             return response()->json([
                 'message' => 'Эксперт был успешно добавлен в избранное.'
             ]);
+        } catch (HttpResponseException $e) {
+            throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Error when adding an expert to favorites:' . $e->getMessage());
