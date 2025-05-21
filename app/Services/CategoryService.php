@@ -25,9 +25,17 @@ class CategoryService
             ], Response::HTTP_FORBIDDEN));
         }
 
-        $category = $this->categoryRepository->getCategoryByTitle($data['title']);
-        if ($category) {
-            \Log::error('Category already exists.', ['category_id' => $category->id]);
+        $categoryByTitle = $this->categoryRepository->getCategoryByTitle($data['title']);
+        if ($categoryByTitle) {
+            \Log::error('Category already exists.', ['category_id' => $categoryByTitle->id]);
+            throw new HttpResponseException(response()->json([
+                'message' => 'Категория уже существует.'
+            ]));
+        }
+
+        $categoryBySubtitle = $this->categoryRepository->getCategoryBySubtitle($data['subtitle']);
+        if ($categoryBySubtitle) {
+            \Log::error('Category already exists.', ['category_id' => $categoryBySubtitle->id]);
             throw new HttpResponseException(response()->json([
                 'message' => 'Категория уже существует.'
             ]));

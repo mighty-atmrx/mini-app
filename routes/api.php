@@ -39,6 +39,7 @@ Route::middleware(['jwt.verify'])->group(function () {
         ], Response::HTTP_OK);
     });
     /*   Пользователь   */
+    Route::get('/users-to-excel', [AdminController::class, 'exportUsersToExcel'])->name('users-to-excel');
     Route::get('/profile/{userId}', [UserController::class, 'show']);
     Route::get('/users/{userId}', [UserController::class, 'getUserById'])->middleware('ensure.expert');
     Route::delete('/users/{userId}', [AdminController::class, 'deleteUser'])->name('admin.user.delete');
@@ -50,6 +51,7 @@ Route::middleware(['jwt.verify'])->group(function () {
 
     /*   Эксперты   */
     Route::get('/experts', [ExpertController::class, 'index'])->name('expert.index');
+    Route::get('/experts-to-excel', [AdminController::class, 'exportExpertsToExcel'])->name('experts-to-excel');
     Route::get('/experts/{expertId}', [ExpertController::class, 'getParticularExpert'])->name('expert.get_particular_expert');
     Route::get('/experts/{expertId}/services', [ServiceController::class, 'getExpertServices'])->name('service.get_expert_services');
     Route::post('/experts', [ExpertController::class, 'store'])->name('expert.store');

@@ -11,6 +11,11 @@ class CategoryRepository
         return Category::where('title', $title)->first();
     }
 
+    public function getCategoryBySubtitle(string $subtitle)
+    {
+        return Category::where('subtitle', $subtitle)->first();
+    }
+
     public function getCategoryById(int $categoryId)
     {
         return Category::find($categoryId);

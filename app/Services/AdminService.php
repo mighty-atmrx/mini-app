@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Exports\ExpertsExport;
 use App\Repositories\ExpertRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminService
