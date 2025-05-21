@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('title')->unique();
             $table->string('subtitle')->nullable();
             $table->string('description')->nullable();
+            $table->integer('position')->default(0);
             $table->timestamps();
         });
     }

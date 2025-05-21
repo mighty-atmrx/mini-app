@@ -70,6 +70,8 @@ class CategoryFactory extends Factory
             ''
         ];
 
+        static $position = 0;
+
         static $index = 0;
         $title = $titles[$index % count($titles)];
         $index++;
@@ -82,10 +84,13 @@ class CategoryFactory extends Factory
         $description = $descriptions[$descriptionIndex % count($descriptions)];
         $descriptionIndex++;
 
+        $position++;
+
         return [
             'title' => $title,
             'subtitle' => $subTitle,
             'description' => $description,
+            'position' => $position,
         ];
     }
 }

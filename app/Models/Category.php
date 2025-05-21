@@ -12,7 +12,7 @@ class Category extends Model
     use Filterable;
 
     protected $table = 'categories';
-    protected $fillable = ['id', 'category'];
+    protected $fillable = ['id', 'title', 'subtitle', 'description', 'position'];
     protected $dates = ['created_at', 'updated_at'];
 
     public function experts()

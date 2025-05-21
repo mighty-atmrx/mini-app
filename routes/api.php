@@ -43,6 +43,8 @@ Route::middleware(['jwt.verify'])->group(function () {
 
     /*   Категории   */
     Route::get('/categories', [CategoryController::class, 'index'])->name('category.index');
+    Route::post('/categories', [CategoryController::class, 'create'])->name('category.create');
+    Route::delete('/categories/{categoryId}', [CategoryController::class, 'delete'])->name('category.delete');
 
     /*   Эксперты   */
     Route::get('/experts', [ExpertController::class, 'index'])->name('expert.index');
