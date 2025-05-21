@@ -30,7 +30,7 @@ class CategoryController extends Controller
         $data = $request->validate([
             'title' => 'required|string',
             'subtitle' => 'required|string',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'position' => 'nullable|integer',
         ]);
 

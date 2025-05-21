@@ -33,6 +33,10 @@ class CategoryService
             ]));
         }
 
+        if (!isset($data['position'])) {
+            $data['position'] = DB::table('categories')->max('position') + 1;
+        }
+
         DB::table('categories')
             ->where('position', '>=', $data['position'])
             ->increment('position');

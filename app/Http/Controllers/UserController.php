@@ -93,7 +93,7 @@ class UserController extends Controller
         if (!$user) {
             \Log::error('User not found with id ' . $userId);
             return response()->json([
-                'message' => 'User not found'
+                'message' => 'Пользователь не найден.'
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -101,7 +101,7 @@ class UserController extends Controller
         if (!$expert) {
             \Log::error('Expert not found with user id ' . auth()->id());
             return response()->json([
-                'message' => 'Expert not found'
+                'message' => 'Эксперт не найден.'
             ], Response::HTTP_NOT_FOUND);
         }
 

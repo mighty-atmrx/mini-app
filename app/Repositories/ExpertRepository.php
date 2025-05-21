@@ -56,4 +56,10 @@ class ExpertRepository
         $expert->saveOrFail();
         return $expert;
     }
+
+    public function delete($expertId)
+    {
+        $expert = $this->getExpertById($expertId);
+        return $expert->delete();
+    }
 }

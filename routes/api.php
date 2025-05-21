@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ExpertsScheduleController;
@@ -40,6 +41,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     /*   Пользователь   */
     Route::get('/profile/{userId}', [UserController::class, 'show']);
     Route::get('/users/{userId}', [UserController::class, 'getUserById'])->middleware('ensure.expert');
+    Route::delete('/users/{userId}', [AdminController::class, 'deleteUser'])->name('admin.user.delete');
 
     /*   Категории   */
     Route::get('/categories', [CategoryController::class, 'index'])->name('category.index');
@@ -52,6 +54,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::get('/experts/{expertId}/services', [ServiceController::class, 'getExpertServices'])->name('service.get_expert_services');
     Route::post('/experts', [ExpertController::class, 'store'])->name('expert.store');
     Route::patch('/experts/{expertId}', [ExpertController::class, 'update'])->name('expert.update');
+    Route::delete('/experts/{expertId}', [AdminController::class, 'deleteExpert'])->name('admin.expert.delete');
 
     /*   Избранное   */
     Route::get('/favorites/experts', [ExpertController::class, 'getExpertsData'])->name('experts.favorites');

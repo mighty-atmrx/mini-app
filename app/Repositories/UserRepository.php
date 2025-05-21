@@ -16,7 +16,7 @@ class UserRepository
 
     public function findUserById(int $userId): ?User
     {
-        return User::findOrFail($userId);
+        return User::find($userId);
     }
 
     public function save(array $data, string $hashedTelegramId): User
@@ -60,5 +60,11 @@ class UserRepository
         $user->rating = $rating;
         $user->saveOrFail();
         return $user;
+    }
+
+    public function delete(int $userId)
+    {
+        $user = $this->findUserById($userId);
+        return $user->delete();
     }
 }
