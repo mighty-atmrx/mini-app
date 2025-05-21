@@ -75,7 +75,13 @@ class Filter extends AbstractFilter
 
     protected function rating(Builder $builder, $value)
     {
-        //
+        if (empty($value)) {
+            return $builder;
+        }
+
+        \Log::info('Applying rating filter', ['value' => $value]);
+
+        return $builder->where('rating', '>=', $value);
     }
 
     protected function isAFree(Builder $builder, $value)

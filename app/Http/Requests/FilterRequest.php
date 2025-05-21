@@ -24,7 +24,7 @@ class FilterRequest extends FormRequest
         return [
             'search' => 'string|nullable',
             'category' => 'string|nullable',
-            'rating' => 'float|nullable',
+            'rating' => 'numeric|nullable',
             'isAFree' => 'boolean|nullable',
         ];
     }

@@ -14,7 +14,7 @@ class Expert extends Model
     protected $table = 'experts';
     protected $fillable = [
         'user_id', 'first_name', 'last_name', 'biography',
-        'photo', 'experience', 'education'
+        'photo', 'experience', 'education', 'rating'
     ];
 
     public function categories()

@@ -1184,6 +1184,82 @@
 }
 ```
 
+### GET /api/experts?rating=4.5
+- **Описание**: Фильтр по рейтингу(выдает экспертов с указанным рейтингом и выше).
+- **Параметры**:
+- **Авторизация**: Есть.
+
+- **Пример ответа (успех)**:
+```json
+{
+    "current_page": 1,
+    "data": [
+        {
+            "id": 2,
+            "user_id": 4,
+            "first_name": "Магомед",
+            "last_name": "Магомедов",
+            "biography": "Последние 10 лет активно работаю и развиваюсь в области ораторского мастерства и эффективных коммуникаций.",
+            "photo": "https://randomuser.me/api/portraits/men/64.jpg",
+            "experience": "10 лет вещаю людям про жизнь и то, как важно быть оратором.",
+            "education": "Учился в горном институте на оратора 4 года, а после этого практиковался на улице.",
+            "rating": 5,
+            "created_at": "2025-05-20T15:08:06.000000Z",
+            "updated_at": "2025-05-20T15:09:22.000000Z",
+            "categories": [
+                {
+                    "id": 2,
+                    "title": "Психология и коучинг",
+                    "subtitle": "PsychologyAndCoaching",
+                    "description": "(самооценка, уверенность, страхи)",
+                    "position": 2,
+                    "created_at": "2025-05-20T14:41:53.000000Z",
+                    "updated_at": "2025-05-20T14:41:53.000000Z",
+                    "pivot": {
+                        "expert_id": 2,
+                        "category_id": 2
+                    }
+                }
+            ]
+        }
+    ],
+    "first_page_url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts?page=1",
+    "from": 1,
+    "last_page": 1,
+    "last_page_url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts?page=1",
+    "links": [
+        {
+            "url": null,
+            "label": "&laquo; Previous",
+            "active": false
+        },
+        {
+            "url": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts?page=1",
+            "label": "1",
+            "active": true
+        },
+        {
+            "url": null,
+            "label": "Next &raquo;",
+            "active": false
+        }
+    ],
+    "next_page_url": null,
+    "path": "http://bluejay-pretty-clearly.ngrok-free.app/api/experts",
+    "per_page": 10,
+    "prev_page_url": null,
+    "to": 1,
+    "total": 1
+}
+```
+- **Пример ответа (ошибка)**:
+- (Если экспертов по выбранным фильтрам нет, то пользователь получит пустой список)
+```json
+{
+    "message": "Ошибка при получении данных"
+}
+```
+
 
 ### Расписание Эксперта
 ### GET /api/my-available-slots
