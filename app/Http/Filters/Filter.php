@@ -87,9 +87,13 @@ class Filter extends AbstractFilter
     protected function isAFree(Builder $builder, $value)
     {
         if ($value) {
-            $builder->where('price', '=', 0);
+            $builder->whereHas('services', function ($query) use ($value) {
+                $query->where('price', '=', 0);
+            });
         } else {
-            $builder->where('price', '!=', 0);
+            $builder->whereDoesntHave('services', function ($query) use ($value) {
+                $query->where('price', '=', 0);
+            });
         }
     }
 }

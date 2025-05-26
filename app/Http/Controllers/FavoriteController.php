@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Expert;
 use App\Models\Favorite;
 use App\Repositories\ExpertRepository;
 use App\Services\FavoriteService;

@@ -41,4 +41,9 @@ class Expert extends Model
     {
         return $this->hasMany(ExpertReview::class);
     }
+
+    public function services()
+    {
+        return $this->hasMany(Service::class);
+    }
 }

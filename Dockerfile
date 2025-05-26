@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     postgresql-client \
+    cron \
+    supervisor \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo pdo_pgsql gd zip \
     && rm -rf /var/lib/apt/lists/*
@@ -28,6 +30,13 @@ COPY . .
 RUN chown -R www-data:www-data /var/www
 RUN chmod 755 /var/www
 
+COPY docker/supervisord.conf /etc/supervisord.conf
+
+COPY docker/laravel.cron /etc/cron.d/laravel
+
+RUN chmod 0644 /etc/cron.d/laravel \
+    && crontab /etc/cron.d/laravel
+
 EXPOSE 9000
 
-CMD ["php-fpm"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
