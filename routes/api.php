@@ -83,6 +83,9 @@ Route::middleware(['jwt.verify'])->group(function () {
     /*   Отзывы   */
     Route::post('/experts/{expertId}', [ReviewController::class, 'storeReviewForExpert'])->name('expert_review.store');
     Route::post('/users/{userId}', [ReviewController::class, 'storeReviewForUser'])->name('user_review.store');
+
+    /*   Статистика   */
+    Route::get('/statistics', [AdminController::class, 'exportStatistic'])->name('admin.export_statistic');
 });
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle'])->middleware('fix_telegraph_bot');
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);

@@ -402,6 +402,7 @@
 - **Параметры**:
   - `first_name` (string, required): имя эксперта.
   - `last_name` (integer, required): фамилия категории.
+  - `profession` (string, required): профессия
   - `biography` (string, optional): биография эксперта.
   - `photo` (string, optional): фотография эксперта.
   - `experience` (string, optional): опыт эксперта.
@@ -412,6 +413,7 @@
   {
       "first_name": "Василий",
       "last_name": "Васильев",
+      "profession": "Кулинар",
       "biography": "Пеку пирожки",
       "photo": "https://example.com/photo.jpg",
       "experience": "10 лет учу печь пирожки",
@@ -425,6 +427,7 @@
     "expert": {
         "first_name": "Василий",
         "last_name": "Васильев",
+        "profession": "Кулинар",
         "biography": "Пеку пирожки",
         "photo": "http://bluejay-pretty-clearly.ngrok-free.app/storage/experts/rzfvNy5xSb4AsEhdweR7joKinrU55vGatcaBuWz0.jpg",
         "experience": "10 лет учу печь пирожки",
@@ -449,8 +452,9 @@
 ### PATCH /api/experts/{expertId}
 - **Описание**: Обновление данных эксперта.
 - **Параметры**:
-  - `first_name` (integer, required): имя эксперта.
+  - `first_name` (integer, optional): имя эксперта.
   - `last_name` (string, optional): фамилия эксперта.
+  - `profession` (string, optional): профессия
   - `biography` (integer, optional): биография категории.
   - `photo` (string, optional): фото эксперта.
   - `experience` (string, optional): опыт эксперта.
@@ -473,6 +477,7 @@
         "user_id": 8,
         "first_name": "Джон",
         "last_name": "Уик",
+        "profession": "Собаковод",
         "biography": "Люблю собак",
         "photo": "http://bluejay-pretty-clearly.ngrok-free.app/storage/experts/rzfvNy5xSb4AsEhdweR7joKinrU55vGatcaBuWz0.jpg",
         "experience": "10 лет учу печь пирожки",
@@ -1571,6 +1576,17 @@
 - **Описание**: Админ может получить всех пользователей в excel-формате.
 - **Авторизация**: Есть(и проверка на роль админа).
 - ** При успешном ответе админу будет сразу загружаться файл excel-формата с пользователями.
+- **Пример ответа (ошибка)**:
+```json
+{
+    "message": "Доступ запрещен."
+}
+```
+
+### GET /api/statistics
+- **Описание**: Админ может получить статистику в excel-формате.
+- **Авторизация**: Есть(и проверка на роль админа).
+- ** При успешном ответе админу будет сразу загружаться файл excel-формата статистики.
 - **Пример ответа (ошибка)**:
 ```json
 {

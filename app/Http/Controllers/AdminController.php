@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\ExpertsExport;
+use App\Exports\StatisticExport;
 use App\Exports\UsersExport;
 use App\Services\AdminService;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -107,6 +108,27 @@ class AdminController extends Controller
             \Log::error('Admin export users to excel error.', ['error' => $e->getMessage()]);
             return response()->json([
                 'message' => 'Не удалось выгрузить данные всех пользователей.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function exportStatistic()
+    {
+        \Log::info('Admin export statistic to excel method received.');
+
+        try {
+            if (auth()->user()->role !== 'admin') {
+                \Log::error('User is not an admin.');
+                return response()->json([
+                    'message' => 'Доступ запрещен.'
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            return Excel::download(new StatisticExport(), 'statistic.xlsx');
+        } catch (\Exception $e) {
+            \Log::error('Admin export statistic to excel error.', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Не удалось выгрузить данные статистики.'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

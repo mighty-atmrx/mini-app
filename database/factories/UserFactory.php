@@ -27,7 +27,7 @@ class UserFactory extends Factory
         static $baseFirstNames = ['Василий', 'Сергей', 'Петр', 'Магомед', 'Игорь'];
         static $baseLastNames = ['Олохов', 'Бурунов', 'Петров', 'Магомедов', 'Игривый'];
         static $baseBirthdates = ['01.01.1991', '02.02.1992', '03.03.1993', '04.04.1995', '05.05.1995'];
-        static $basePhones = ['+77056562323', '+77087674343', '+77012345678', '+77098765432', '+770987654321'];
+        static $basePhones = ['+77056562323', '+77087674343', '+77012345678', '+77098765432', '+77085554433'];
         static $baseRoles = ['user', 'user', 'expert', 'expert', 'admin'];
 
         static $index = 0;
