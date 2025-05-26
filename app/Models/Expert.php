@@ -13,7 +13,7 @@ class Expert extends Model
 
     protected $table = 'experts';
     protected $fillable = [
-        'user_id', 'first_name', 'last_name', 'biography',
+        'user_id', 'first_name', 'last_name', 'profession', 'biography',
         'photo', 'experience', 'education', 'rating'
     ];
 

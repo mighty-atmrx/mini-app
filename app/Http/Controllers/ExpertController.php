@@ -150,8 +150,9 @@ class ExpertController extends Controller
 
     public function update(UpdateExpertRequest $request, int $expertId)
     {
-        DB::beginTransaction();
+        \Log::info('Expert update method received');
 
+        DB::beginTransaction();
         $data = $request->validated();
 
         if ($request->hasFile('photo')) {

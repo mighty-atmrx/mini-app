@@ -29,6 +29,7 @@ class StoreExpertRequest extends FormRequest
         return [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
+            'profession' => 'required|string',
             'biography' => 'required|string',
             'photo' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             'experience' => 'required|string',

@@ -19,6 +19,7 @@ class ExpertFactory extends Factory
         static $baseUserIds = [3, 4];
         static $baseFirstNames = ['Петр', 'Магомед'];
         static $baseLastNames = ['Петров', 'Магомедов'];
+        static $baseProfessions = ['Тренер личностного роста', 'Психолог'];
 
         static $baseBiographies = [
             'В детстве я очень любил наблюдать за тем, как бабушка пекет пирожки. Теперь я сам их пеку.',
@@ -45,6 +46,7 @@ class ExpertFactory extends Factory
         $userId = $baseUserIds[$index % count($baseUserIds)];
         $firstName = $baseFirstNames[$index % count($baseFirstNames)];
         $lastName = $baseLastNames[$index % count($baseLastNames)];
+        $profession = $baseProfessions[$index % count($baseProfessions)];
         $biography = $baseBiographies[$index % count($baseBiographies)];
         $photo = $basePhotos[$index % count($basePhotos)];
         $experience = $baseExperiences[$index % count($baseExperiences)];
@@ -56,6 +58,7 @@ class ExpertFactory extends Factory
             'user_id' => $userId,
             'first_name' => $firstName,
             'last_name' => $lastName,
+            'profession' => $profession,
             'biography' => $biography,
             'photo' => $photo,
             'experience' => $experience,
