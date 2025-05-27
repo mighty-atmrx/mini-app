@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -60,6 +61,12 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
+    public function telegramChat()
+    {
+        return $this->hasOne(TelegraphChat::class, 'chat_id', 'telegram_user_id')
+            ->whereRaw('chat_id = CAST(HEX_TO_BINARY(telegram_user_id) AS BINARY)');
+    }
+
     public function favorites()
     {
         return $this->belongsToMany(Expert::class, 'favorites', 'user_id', 'expert_id');
@@ -73,5 +80,10 @@ class User extends Authenticatable implements JWTSubject
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
     }
 }
