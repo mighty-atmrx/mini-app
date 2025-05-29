@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\BookingNotifyCommand;
 use App\Console\Commands\DeleteOldExpertSchedules;
+use App\Console\Commands\ExpertReviewNotifyCommand;
 use App\Console\Commands\UpdateBookingStatus;
 use App\Console\Commands\UserReviewNotifyCommand;
 use Illuminate\Console\Scheduling\Schedule;
@@ -16,6 +17,7 @@ class Kernel extends ConsoleKernel
         UpdateBookingStatus::class,
         BookingNotifyCommand::class,
         UserReviewNotifyCommand::class,
+        ExpertReviewNotifyCommand::class,
     ];
 
     protected function schedule(Schedule $schedule)
@@ -23,7 +25,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:delete-old-expert-schedules')->dailyAt('00:10');
         $schedule->command('app:update-booking-status')->everyFiveMinutes();
         $schedule->command('app:booking-notify-command')->everyMinute();
-        $schedule->command('app:user-review-notify-command')->everyFiveMinutes();
+        $schedule->command('app:user-review-notify-command')->everyMinute();
+        $schedule->command('app:expert-review-notify-command')->everyMinute();
     }
 
     protected function commands()

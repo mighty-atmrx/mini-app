@@ -3,15 +3,18 @@
 namespace App\Console\Commands;
 
 use App\Models\Booking;
+use App\Models\Expert;
+use App\Models\ExpertReview;
+use App\Models\User;
 use App\Models\UserReviews;
 use App\Telegram\KeyboardFactory;
 use Carbon\Carbon;
 use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Console\Command;
 
-class UserReviewNotifyCommand extends Command
+class ExpertReviewNotifyCommand extends Command
 {
-    protected $signature = 'app:user-review-notify-command';
+    protected $signature = 'app:expert-review-notify-command';
     protected $description = 'Command description';
 
     public function handle()
@@ -19,7 +22,6 @@ class UserReviewNotifyCommand extends Command
         $now = Carbon::now('Asia/Almaty');
 
         $bookings = Booking::where('status', 'completed')
-            ->with('user')
             ->get()
             ->filter(function ($booking) use ($now) {
                 $datetimeString = trim("{$booking->date} {$booking->time}");
@@ -30,18 +32,18 @@ class UserReviewNotifyCommand extends Command
                 $minutesDiff = $now->diffInMinutes($reviewTime, false);
                 $isReviewTime = $minutesDiff >= -1 && $minutesDiff <= 1;
 
-                $reviewCount = UserReviews::where('user_id', $booking->user_id)
-                    ->where('expert_id', $booking->expert_id)
+                $reviewCount = ExpertReview::where('expert_id', $booking->expert_id)
+                    ->where('user_id', $booking->user_id)
                     ->count();
 
-                $bookingCount = Booking::where('user_id', $booking->user_id)
-                    ->where('expert_id', $booking->expert_id)
+                $bookingCount = Booking::where('expert_id', $booking->expert_id)
+                    ->where('user_id', $booking->user_id)
                     ->where('status', 'completed')
                     ->count();
 
                 $shouldNotify = $reviewCount < $bookingCount;
 
-                \Log::info('Checking review conditions for user', [
+                \Log::info('Checking review conditions for expert', [
                     'booking_id' => $booking->id,
                     'booking_datetime' => $bookingDateTime->toDateTimeString(),
                     'review_time' => $reviewTime->toDateTimeString(),
@@ -58,18 +60,20 @@ class UserReviewNotifyCommand extends Command
             });
 
         foreach ($bookings as $booking) {
-            $telegramUserId = $booking->user->telegram_user_id;
+            $expert = Expert::find($booking->expert_id);
+            $user = User::find($expert->user_id);
+            $telegramUserId = $user->telegram_user_id;
             $chat = TelegraphChat::whereRaw("encode(sha256(chat_id::text::bytea), 'hex') = ?", [$telegramUserId])->first();
 
             if (!$chat) {
-                \Log::warning('Chat not found for user', ['user_id' => $booking->user->id, 'telegram_user_id' => $telegramUserId]);
+                \Log::warning('Chat not found for expert', ['expert_id' => $expert->id, 'telegram_user_id' => $telegramUserId]);
                 continue;
             }
 
             $bookingDateTime = Carbon::createFromFormat('Y-m-d H:i:s', "{$booking->date} {$booking->time}", 'Asia/Almaty')
                 ?: Carbon::parse("{$booking->date} {$booking->time}", 'Asia/Almaty');
 
-            $response = $chat->message("*Напоминание:* Ваша консультация с экспертом была {$bookingDateTime->format('Y-m-d H:i')}. Пожалуйста оставьте отзыв о работе с экспертом!")
+            $response = $chat->message("*Напоминание:* Ваша консультация с экспертом была {$bookingDateTime->format('Y-m-d H:i')}. Пожалуйста оставьте отзыв о работе с пользователем!")
                 ->keyboard(KeyboardFactory::makeAppKeyboard(config('telegram.mini_app_url')))
                 ->send();
             \Log::info('Review reminder sent', [
