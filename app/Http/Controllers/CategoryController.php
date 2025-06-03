@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Services\CategoryService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
@@ -20,8 +19,15 @@ class CategoryController extends Controller
 
     public function index()
     {
-        $categories = Category::orderBy('position')->get();
-        return response()->json($categories);
+        try {
+            $response = $this->categoryService->index();
+            return response()->json($response);
+        } catch (\Exception $e) {
+            \Log::error('CategoryController@index - Exception: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Не удалось получить данные о категориях'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     public function create(Request $request)

@@ -6,6 +6,11 @@ use App\Models\Category;
 
 class CategoryRepository
 {
+    public function getAllCategories()
+    {
+        return Category::all();
+    }
+
     public function getCategoryByTitle(string $title)
     {
         return Category::where('title', $title)->first();
