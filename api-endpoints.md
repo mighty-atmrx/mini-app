@@ -540,9 +540,17 @@
     "user_role": "expert",
     "pending_reviews": [
         {
-            "id": 5,
+            "user_id": 5,
             "first_name": "Игорь",
-            "last_name": "Игривый"
+            "last_name": "Игривый",
+            "role": "Клиент"
+        }, 
+        {
+            "expert_id": 1,
+            "first_name": "Петр",
+            "last_name": "Петров",
+            "photo": "https://randomuser.me/api/portraits/men/17.jpg",
+            "role": "Эксперт"
         }
     ]
 }
