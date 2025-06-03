@@ -2,6 +2,7 @@
 
 namespace App\Telegram;
 
+use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Services\UserService;
 use App\Telegram\State\BirthdateState;
@@ -182,6 +183,17 @@ class Handler extends WebhookHandler
     {
         if (!$this->chat) {
             \Log::error('Chat not initialized in openapp');
+            return;
+        }
+
+        $telegramUserId = hash('sha256', $this->chat->chat_id);
+        if (!User::where('telegram_user_id', $telegramUserId)->exists()) {
+            \Log::error('User not found');
+            $this->chat->message('Вы не зарегистрированы. Чтобы начать регистрацию нажмите на кнопку ниже👇')
+                ->keyboard(Keyboard::make()->buttons([
+                    Button::make('Начать (/start)')->action('start')
+                ]))
+                ->send();
             return;
         }
 
