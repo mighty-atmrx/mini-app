@@ -16,8 +16,8 @@ class ExpertCategoryFactory extends Factory
      */
     public function definition(): array
     {
-        static $baseExpertIds = [1, 2];
-        static $baseCategoryIds = [1, 2];
+        static $baseExpertIds = [1, 2, 3, 4, 5, 6, 7];
+        static $baseCategoryIds = [1, 1, 1, 1, 1, 3, 3];
 
         static $index = 0;
 

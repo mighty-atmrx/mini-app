@@ -13,6 +13,6 @@ class ExpertCategorySeeder extends Seeder
      */
     public function run(): void
     {
-        ExpertCategory::factory()->count(2)->create();
+        ExpertCategory::factory()->count(7)->create();
     }
 }

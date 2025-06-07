@@ -13,7 +13,7 @@ class ExpertReviewSeeder extends Seeder
      */
     public function run(): void
     {
-        ExpertReview::factory()->count(3)->create();
+        ExpertReview::factory()->count(7)->create();
         $experts = Expert::with('reviews')->get();
         foreach ($experts as $expert) {
             $rating = ExpertReview::where('expert_id', $expert->id)->avg('rating');
