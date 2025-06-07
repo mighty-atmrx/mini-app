@@ -14,6 +14,7 @@ use App\Repositories\UserRepository;
 use App\Services\ExpertService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
 
 class ExpertController extends Controller
@@ -124,7 +125,8 @@ class ExpertController extends Controller
 
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('experts', 'public');
-            $data['photo'] = '/storage/' . $path;
+            \Log::info('Photo stored', ['path' => $path, 'full_path' => URL::to('/storage/' . $path, [], env('APP_URL', 'https://bluejay-pretty-clearly.ngrok-free.app'))]);
+            $data['photo'] = URL::to('/storage/' . $path, [], env('APP_URL', 'https://bluejay-pretty-clearly.ngrok-free.app'));
         }
 
         DB::beginTransaction();
