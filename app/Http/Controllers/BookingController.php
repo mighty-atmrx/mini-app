@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\ServiceRepository;
 use App\Services\BookingService;
 use Carbon\Carbon;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -12,11 +13,14 @@ use Symfony\Component\HttpFoundation\Response;
 class BookingController extends Controller
 {
     protected $bookingService;
+    protected $serviceRepository;
 
     public function __construct(
         BookingService $bookingService,
+        ServiceRepository $serviceRepository
     ){
         $this->bookingService = $bookingService;
+        $this->serviceRepository = $serviceRepository;
     }
 
     public function getAvailableBookings(int $expertId)
@@ -50,6 +54,7 @@ class BookingController extends Controller
             $data['date'] = Carbon::createFromFormat('d.m.Y', $data['date'])->format('Y-m-d');
 
             $booking = $this->bookingService->store($data);
+            $service = $this->serviceRepository->getServiceById($serviceId);
             DB::commit();
 
             \Log::info('Booking added successfully.', [
@@ -58,7 +63,9 @@ class BookingController extends Controller
             return response()->json([
                 'message' => 'Запись к эксперту успешно создана.',
                 'date' => $booking->date,
-                'time' => $booking->time
+                'time' => $booking->time,
+                'service' => $service->title,
+                'service_id' => $serviceId,
             ]);
         } catch (HttpResponseException $e) {
             DB::rollBack();

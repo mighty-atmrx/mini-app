@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Booking;
+use App\Models\ExpertsSchedule;
 use App\Repositories\BookingRepository;
 use App\Repositories\ExpertRepository;
 use App\Repositories\ExpertsScheduleRepository;
@@ -103,6 +104,15 @@ class BookingService
 
         $data['expert_id'] = $expert->id;
         $data['user_id'] = auth()->id();
+
+        if ($service->price == 0) {
+            $data['status'] = 'paid';
+        }
+
+        ExpertsSchedule::where('expert_id', $expert->id)
+            ->where('date', $data['date'])
+            ->where('time', $data['time'])
+            ->delete();
 
         return $this->bookingRepository->create($data);
     }
