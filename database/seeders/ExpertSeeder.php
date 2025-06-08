@@ -13,6 +13,6 @@ class ExpertSeeder extends Seeder
      */
     public function run(): void
     {
-        Expert::factory()->count(7)->create();
+        Expert::factory()->count(8)->create();
     }
 }

@@ -16,10 +16,10 @@ class ExpertReviewFactory extends Factory
      */
     public function definition(): array
     {
-        static $usersIds = [5, 2, 5, 1, 2, 5, 7];
-        static $expertsIds = [1, 2, 3, 4, 5, 6, 7];
-        static $ratings = [2, 3, 4, 5, 4, 3];
-        static $comments = ['Очень хорошо знает свое дело.', 'Профессионал своего дела!', '', '' ,'' ,'' ,''];
+        static $usersIds = [5, 2, 5, 1, 2, 5, 6, 4];
+        static $expertsIds = [1, 2, 3, 4, 5, 6, 7, 8];
+        static $ratings = [2, 3, 4, 5, 4, 3, 4, 5];
+        static $comments = ['Очень хорошо знает свое дело.', 'Профессионал своего дела!', '', '' ,'' ,'' ,'', ''];
 
         static $index = 0;
 
