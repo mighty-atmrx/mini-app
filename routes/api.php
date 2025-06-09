@@ -51,6 +51,7 @@ Route::middleware(['jwt.verify'])->group(function () {
 
     /*   Эксперты   */
     Route::get('/experts', [ExpertController::class, 'index'])->name('expert.index');
+    Route::get('/experts/me', [ExpertController::class, 'getExpertSelfData'])->name('expert.get_self_data');
     Route::get('/experts-to-excel', [AdminController::class, 'exportExpertsToExcel'])->name('experts-to-excel');
     Route::get('/experts/{expertId}', [ExpertController::class, 'getParticularExpert'])->name('expert.get_particular_expert');
     Route::get('/experts/{expertId}/services', [ServiceController::class, 'getExpertServices'])->name('service.get_expert_services');

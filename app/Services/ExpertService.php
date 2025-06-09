@@ -24,6 +24,19 @@ class ExpertService
         $this->serviceRepository = $serviceRepository;
     }
 
+    public function getExpertSelfData()
+    {
+        $expert = $this->expertRepository->getExpertByUserId(auth()->id());
+        if (!$expert) {
+            \Log::error('Expert not found with user id ' . auth()->id());
+            throw new HttpResponseException(response()->json([
+                'message' => 'Эксперт не найден'
+            ], Response::HTTP_NOT_FOUND));
+        }
+
+        return $expert;
+    }
+
     public function userAlreadyHasExpert()
     {
         $expert = $this->expertRepository->getExpertByUserId(auth()->id());
@@ -56,7 +69,6 @@ class ExpertService
             \Log::error('Expert not found or access denied');
             throw new \Exception('Эксперт не найден или доступ запрещен.');
         }
-        dd(1111);
         return $this->expertRepository->update($data, $expertId);
     }
 

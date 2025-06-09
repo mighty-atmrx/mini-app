@@ -51,6 +51,21 @@ class ExpertController extends Controller
         return response()->json($experts);
     }
 
+    public function getExpertSelfData()
+    {
+        try {
+            $expert = $this->expertService->getExpertSelfData();
+            return response()->json($expert);
+        } catch (HttpResponseException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('Get expert self data error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Не удалось получить данные. Попробуйте позже.'
+            ]);
+        }
+    }
+
     public function getParticularExpert($expertId)
     {
         $expert = $this->expertRepository->getExpertById($expertId);
