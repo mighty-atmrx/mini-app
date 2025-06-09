@@ -82,7 +82,10 @@ class AdminController extends Controller
                 ], Response::HTTP_FORBIDDEN);
             }
 
-            return Excel::download(new ExpertsExport, 'experts.xlsx');
+            return Excel::download(new ExpertsExport, 'experts.xlsx', \Maatwebsite\Excel\Excel::XLSX, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="users.xlsx"',
+            ]);
         } catch (\Exception $e) {
             \Log::error('Admin export experts to excel error.', ['error' => $e->getMessage()]);
             return response()->json([
@@ -103,7 +106,10 @@ class AdminController extends Controller
                 ], Response::HTTP_FORBIDDEN);
             }
 
-            return Excel::download(new UsersExport, 'users.xlsx');
+            return Excel::download(new UsersExport, 'users.xlsx', \Maatwebsite\Excel\Excel::XLSX, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="users.xlsx"',
+            ]);
         } catch (\Exception $e) {
             \Log::error('Admin export users to excel error.', ['error' => $e->getMessage()]);
             return response()->json([
@@ -124,7 +130,10 @@ class AdminController extends Controller
                 ], Response::HTTP_FORBIDDEN);
             }
 
-            return Excel::download(new StatisticExport(), 'statistic.xlsx');
+            return Excel::download(new StatisticExport(), 'statistic.xlsx', \Maatwebsite\Excel\Excel::XLSX, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="users.xlsx"',
+            ]);
         } catch (\Exception $e) {
             \Log::error('Admin export statistic to excel error.', ['error' => $e->getMessage()]);
             return response()->json([
