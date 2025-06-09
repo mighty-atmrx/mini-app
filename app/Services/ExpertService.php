@@ -4,19 +4,24 @@ namespace App\Services;
 
 use App\Repositories\ExpertRepository;
 use App\Repositories\ExpertReviewsRepository;
+use App\Repositories\ServiceRepository;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
 
 class ExpertService
 {
     protected $expertRepository;
     protected $expertReviewsRepository;
+    protected $serviceRepository;
 
     public function __construct(
         ExpertRepository $expertRepository,
-        ExpertReviewsRepository $expertReviewsRepository
+        ExpertReviewsRepository $expertReviewsRepository,
+        ServiceRepository $serviceRepository,
     ){
         $this->expertRepository = $expertRepository;
         $this->expertReviewsRepository = $expertReviewsRepository;
+        $this->serviceRepository = $serviceRepository;
     }
 
     public function userAlreadyHasExpert()
@@ -31,6 +36,19 @@ class ExpertService
         return false;
     }
 
+    public function getMyServices()
+    {
+        $expert = $this->expertRepository->getExpertByUserId(auth()->id());
+        if (!$expert) {
+            \Log::error('Expert not found with user id ' . auth()->id());
+            throw new HttpResponseException(response()->json([
+                'message' => 'Вы не являетесь экспертом или эксперт не найден.'
+            ], Response::HTTP_NOT_FOUND));
+        }
+
+        return $this->serviceRepository->getExpertServices($expert->id);
+    }
+
     public function updateExpert(array $data, int $expertId)
     {
         $expert = $this->expertRepository->getExpertById($expertId);
@@ -38,6 +56,7 @@ class ExpertService
             \Log::error('Expert not found or access denied');
             throw new \Exception('Эксперт не найден или доступ запрещен.');
         }
+        dd(1111);
         return $this->expertRepository->update($data, $expertId);
     }
 

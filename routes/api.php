@@ -54,6 +54,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::get('/experts-to-excel', [AdminController::class, 'exportExpertsToExcel'])->name('experts-to-excel');
     Route::get('/experts/{expertId}', [ExpertController::class, 'getParticularExpert'])->name('expert.get_particular_expert');
     Route::get('/experts/{expertId}/services', [ServiceController::class, 'getExpertServices'])->name('service.get_expert_services');
+    Route::get('/get-my-services', [ExpertController::class, 'getMyServices'])->name('expert.get_my_services');
     Route::post('/experts', [ExpertController::class, 'store'])->name('expert.store');
     Route::patch('/experts/{expertId}', [ExpertController::class, 'update'])->name('expert.update');
     Route::delete('/experts/{expertId}', [AdminController::class, 'deleteExpert'])->name('admin.expert.delete');

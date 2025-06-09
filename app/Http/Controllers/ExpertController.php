@@ -12,6 +12,7 @@ use App\Repositories\ExpertRepository;
 use App\Repositories\ExpertReviewsRepository;
 use App\Repositories\UserRepository;
 use App\Services\ExpertService;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -105,6 +106,21 @@ class ExpertController extends Controller
             \Log::error('getExpertsData Exception', ['exception' => $e]);
             return response()->json([
                 'message' => 'Не получилось получить данные экспертов'
+            ], Response::HTTP_NOT_FOUND);
+        }
+    }
+
+    public function getMyServices()
+    {
+        try {
+            $services = $this->expertService->getMyServices();
+            return response()->json($services, Response::HTTP_OK);
+        } catch (HttpResponseException $e){
+            throw $e;
+        }catch (\Exception $e) {
+            \Log::error('getMyServices Exception', ['exception' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Не удалось получить курсы. Попробуйте позже.'
             ], Response::HTTP_NOT_FOUND);
         }
     }
