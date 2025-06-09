@@ -12,6 +12,6 @@ class ExpertsScheduleSeeder extends Seeder
      */
     public function run(): void
     {
-        ExpertsSchedule::factory()->count(9)->create();
+        ExpertsSchedule::factory()->count(13)->create();
     }
 }
