@@ -187,7 +187,8 @@ class ExpertController extends Controller
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('experts', 'public');
             \Log::info('Photo stored', ['path' => $path, 'full_path' => URL::to('/storage/' . $path, [], env('APP_URL', 'https://bluejay-pretty-clearly.ngrok-free.app'))]);
-            $data['photo'] = URL::to('/storage/' . $path, [], env('APP_URL', 'https://bluejay-pretty-clearly.ngrok-free.app'));
+            $data['photo'] = '/storage/' . $request->file('photo')->store('experts', 'public');
+            // $data['photo'] = URL::to('/storage/' . $path, [], env('APP_URL', 'https://bluejay-pretty-clearly.ngrok-free.app'));
         }
 
         DB::beginTransaction();
@@ -225,8 +226,11 @@ class ExpertController extends Controller
                 $relativePath = ltrim(str_replace('/storage/', '', $oldExpert->photo), '/');
                 \Storage::disk('public')->delete($relativePath);
             }
-            $path = $request->file('photo')->store('experts', 'public');
-            $data['photo'] = URL::to('/storage/' . $path, [], env('APP_URL', 'https://bluejay-pretty-clearly.ngrok-free.app'));
+
+            $data['photo'] = '/storage/' . $request->file('photo')->store('experts', 'public');
+
+            // $path = $request->file('photo')->store('experts', 'public');
+            // $data['photo'] = URL::to('/storage/' . $path, [], env('APP_URL', 'https://bluejay-pretty-clearly.ngrok-free.app'));
         }
 
 
