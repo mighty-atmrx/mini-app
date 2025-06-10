@@ -140,6 +140,36 @@ class ExpertController extends Controller
         }
     }
 
+    public function getFutureBookings()
+    {
+        try {
+            $bookings = $this->expertService->getFutureBookings();
+            return response()->json($bookings);
+        } catch (HttpResponseException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('getActiveBookings error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Не удалось получить активные записи к эксперту.'
+            ]);
+        }
+    }
+
+    public function getCompletedBookings()
+    {
+        try {
+            $bookings = $this->expertService->getCompletedBookings();
+            return response()->json($bookings);
+        } catch (HttpResponseException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('getCompletedBookings error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Не удалось получить записи пройденных курсов у эксперта.'
+            ]);
+        }
+    }
+
     public function store(StoreExpertRequest $request)
     {
         \Log::info('Store method');

@@ -44,7 +44,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::get('/users/{userId}', [UserController::class, 'getUserById'])->middleware('ensure.expert');
     Route::delete('/users/{userId}', [AdminController::class, 'deleteUser'])->name('admin.user.delete');
 
-    Route::get('/get-user-future-bookings', [UserController::class, 'getFutureBookings'])->name('user.active-bookings');
+    Route::get('/get-user-future-bookings', [UserController::class, 'getFutureBookings'])->name('user.future-bookings');
     Route::get('/get-user-completed-bookings', [UserController::class, 'getCompletedBookings'])->name('user.completed-bookings');
 
     /*   Категории   */
@@ -62,6 +62,9 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::post('/experts', [ExpertController::class, 'store'])->name('expert.store');
     Route::patch('/experts/{expertId}', [ExpertController::class, 'update'])->name('expert.update');
     Route::delete('/experts/{expertId}', [AdminController::class, 'deleteExpert'])->name('admin.expert.delete');
+
+    Route::get('/get-expert-future-bookings', [ExpertController::class, 'getFutureBookings'])->name('expert.future-bookings');
+    Route::get('/get-expert-completed-bookings', [ExpertController::class, 'getCompletedBookings'])->name('expert.completed-bookings');
 
     /*   Избранное   */
     Route::get('/favorites/experts', [ExpertController::class, 'getExpertsData'])->name('experts.favorites');

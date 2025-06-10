@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Booking;
+use App\Models\Expert;
 use App\Repositories\ExpertRepository;
 use App\Repositories\ExpertReviewsRepository;
 use App\Repositories\ServiceRepository;
+use Carbon\Carbon;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -60,6 +63,70 @@ class ExpertService
         }
 
         return $this->serviceRepository->getExpertServices($expert->id);
+    }
+
+    public function getFutureBookings()
+    {
+        $expert = Expert::where('user_id', auth()->id())->first();
+        if (!$expert) {
+            \Log::error('Expert not found with user id ' . auth()->id());
+            throw new HttpResponseException(response()->json([
+                'message' => 'Эксперт не найден'
+            ], Response::HTTP_NOT_FOUND));
+        }
+
+        $now = Carbon::now();
+        $bookings = Booking::with(['user'])
+            ->where('expert_id', $expert->id)
+            ->where('status', 'paid')
+            ->whereRaw("(date + time) > ?", [$now])
+            ->orderByRaw("CONCAT(date, ' ', time) ASC")
+            ->get();
+
+        $activeBookings = $bookings->map(function ($booking) {
+            return [
+                'user_rating' => $booking->user->rating,
+                'user_phone' => $booking->user->phone,
+                'date' => $booking->date,
+                'time' => $booking->time,
+                'user_id' => $booking->user_id,
+                'date_of_purchase' => $booking->created_at,
+            ];
+        })->all();
+
+        return $activeBookings;
+    }
+
+    public function getCompletedBookings()
+    {
+        $expert = Expert::where('user_id', auth()->id())->first();
+        if (!$expert) {
+            \Log::error('Expert not found with user id ' . auth()->id());
+            throw new HttpResponseException(response()->json([
+                'message' => 'Эксперт не найден'
+            ], Response::HTTP_NOT_FOUND));
+        }
+
+        $now = Carbon::now();
+        $bookings = Booking::with(['user'])
+            ->where('expert_id', $expert->id)
+            ->where('status', 'completed')
+            ->whereRaw("(date + time) < ?", [$now])
+            ->orderByRaw("CONCAT(date, ' ', time) DESC")
+            ->get();
+
+        $completedBookings = $bookings->map(function ($booking) {
+            return [
+                'user_rating' => $booking->user->rating,
+                'user_phone' => $booking->user->phone,
+                'date' => $booking->date,
+                'time' => $booking->time,
+                'user_id' => $booking->user_id,
+                'date_of_purchase' => $booking->created_at,
+            ];
+        })->all();
+
+        return $completedBookings;
     }
 
     public function updateExpert(array $data, int $expertId)
