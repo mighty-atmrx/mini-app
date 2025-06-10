@@ -186,6 +186,73 @@
   }
   ```
 
+### GET /api/get-user-future-bookings
+- **Описание**: Получение предстоящих записей текущего пользователя.
+- **Авторизация**:
+- Требуется (JWT-токен в заголовке `Authorization: Bearer <token>`)
+- **Пример ответа (успех)**:
+  ```json
+  [
+    {
+        "service_title": "Как перестать бояться говорить на публику",
+        "date": "2025-06-11",
+        "time": "11:00:00",
+        "expert_first_name": "Сергей",
+        "expert_last_name": "Бурунов",
+        "expert_photo": "https://randomuser.me/api/portraits/men/64.jpg",
+        "expert_phone": "+77087674343",
+        "expert_id": 2,
+        "expert_rating": 3
+    }
+  ]
+  ```
+- **Пример ответа (ошибка)**:
+  ```json
+  {
+      "message": "Не удалось получить активные записи пользователя"
+  }
+  ```
+
+### GET /api/get-user-completed-bookings
+- **Описание**: Получение записей пройденных курсов текущего пользователя.
+- **Авторизация**:
+- Требуется (JWT-токен в заголовке `Authorization: Bearer <token>`)
+- **Пример ответа (успех)**:
+  ```json
+  [
+    {
+        "service_title": "Бесплатный курс по пирожкам",
+        "date": "2025-06-10",
+        "time": "12:00:00",
+        "expert_first_name": "Василий",
+        "expert_last_name": "Олохов",
+        "expert_photo": "https://randomuser.me/api/portraits/men/17.jpg",
+        "expert_phone": "+77056562323",
+        "expert_id": 1,
+        "expert_rating": 2,
+        "date_of_purchase": "2025-06-08T17:04:57.000000Z"
+    },
+    {
+        "service_title": "Курс по обществознанию",
+        "date": "2025-06-10",
+        "time": "22:00:00",
+        "expert_first_name": "Петр",
+        "expert_last_name": "Петров",
+        "expert_photo": "https://randomuser.me/api/portraits/women/46.jpg",
+        "expert_phone": "+77012345678",
+        "expert_id": 3,
+        "expert_rating": 4,
+        "date_of_purchase": null
+    }
+  ]
+  ```
+- **Пример ответа (ошибка)**:
+  ```json
+  {
+      "message": "Не удалось получить записи пройденных курсов пользователя"
+  }
+  ```
+
 ### POST /api/users
 - **Описание**: Создание нового пользователя.
 - **Параметры**:

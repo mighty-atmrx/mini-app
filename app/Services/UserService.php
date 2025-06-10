@@ -2,8 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\Booking;
+use App\Models\Expert;
+use App\Models\Service;
+use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Repositories\UserReviewsRepository;
+use Carbon\Carbon;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UserService
@@ -17,6 +22,61 @@ class UserService
     ){
         $this->userRepository = $userRepository;
         $this->userReviewsRepository = $userReviewsRepository;
+    }
+
+    public function getFutureBookings()
+    {
+        $now = Carbon::now();
+        $bookings = Booking::with(['expert.user', 'service'])
+            ->where('user_id', auth()->id())
+            ->where('status', 'paid')
+            ->whereRaw("(date + time) > ?", [$now])
+            ->orderByRaw("CONCAT(date, ' ', time) ASC")
+            ->get();
+
+        $activeBookings = $bookings->map(function ($booking) {
+            return [
+                'service_title' => $booking->service->title,
+                'date' => $booking->date,
+                'time' => $booking->time,
+                'expert_first_name' => $booking->expert->first_name,
+                'expert_last_name' => $booking->expert->last_name,
+                'expert_photo' => $booking->expert->photo,
+                'expert_phone' => $booking->expert->user->phone,
+                'expert_id' => $booking->expert->id,
+                'expert_rating' => $booking->expert->rating,
+            ];
+        })->all();
+
+        return $activeBookings;
+    }
+
+    public function getCompletedBookings()
+    {
+        $now = Carbon::now();
+        $bookings = Booking::with(['expert.user', 'service'])
+            ->where('user_id', auth()->id())
+            ->where('status', 'completed')
+            ->whereRaw("(date + time) < ?", [$now])
+            ->orderByRaw("CONCAT(date, ' ', time) DESC")
+            ->get();
+
+        $completedBookings = $bookings->map(function ($booking) {
+            return [
+                'service_title' => $booking->service->title,
+                'date' => $booking->date,
+                'time' => $booking->time,
+                'expert_first_name' => $booking->expert->first_name,
+                'expert_last_name' => $booking->expert->last_name,
+                'expert_photo' => $booking->expert->photo,
+                'expert_phone' => $booking->expert->user->phone,
+                'expert_id' => $booking->expert->id,
+                'expert_rating' => $booking->expert->rating,
+                'date_of_purchase' => $booking->created_at,
+            ];
+        })->all();
+
+        return $completedBookings;
     }
 
     public function userCreate(array $data, $telegramId)

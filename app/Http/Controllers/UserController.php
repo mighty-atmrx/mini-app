@@ -9,6 +9,7 @@ use App\Repositories\UserRepository;
 use App\Repositories\UserReviewsRepository;
 use App\Services\UserService;
 use App\Telegram\InputValidator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,6 +36,32 @@ class UserController extends Controller
         $this->expertRepository = $expertRepository;
         $this->bookingRepository = $bookingRepository;
         $this->userReviewsRepository = $userReviewsRepository;
+    }
+
+    public function getFutureBookings()
+    {
+        try {
+            $bookings = $this->userService->getFutureBookings();
+            return response()->json($bookings);
+        } catch (\Exception $e) {
+            \Log::error('getActiveBookings error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Не удалось получить активные записи пользователя'
+            ]);
+        }
+    }
+
+    public function getCompletedBookings()
+    {
+        try {
+            $bookings = $this->userService->getCompletedBookings();
+            return response()->json($bookings);
+        } catch (\Exception $e) {
+            \Log::error('getCompletedBookings error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Не удалось получить записи пройденных курсов пользователя'
+            ]);
+        }
     }
 
     public function store(Request $request)

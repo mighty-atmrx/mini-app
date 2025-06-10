@@ -44,6 +44,9 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::get('/users/{userId}', [UserController::class, 'getUserById'])->middleware('ensure.expert');
     Route::delete('/users/{userId}', [AdminController::class, 'deleteUser'])->name('admin.user.delete');
 
+    Route::get('/get-user-future-bookings', [UserController::class, 'getFutureBookings'])->name('user.active-bookings');
+    Route::get('/get-user-completed-bookings', [UserController::class, 'getCompletedBookings'])->name('user.completed-bookings');
+
     /*   Категории   */
     Route::get('/categories', [CategoryController::class, 'index'])->name('category.index');
     Route::post('/categories', [CategoryController::class, 'create'])->name('category.create');
