@@ -76,10 +76,17 @@ class ExpertService
         }
 
         $now = Carbon::now();
+        $oneHourAgo = $now->copy()->subHour()->toDateTimeString();
+
         $bookings = Booking::with(['user'])
             ->where('expert_id', $expert->id)
-            ->where('status', 'paid')
-            ->whereRaw("(date + time) > ?", [$now])
+            ->where(function ($query) use ($now, $oneHourAgo) {
+                $query->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp > ?", [$now->toDateTimeString()])
+                    ->orWhere(function ($q) use ($now, $oneHourAgo) {
+                        $q->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp <= ?", [$now->toDateTimeString()])
+                            ->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp >= ?", [$oneHourAgo]);
+                    });
+            })
             ->orderByRaw("CONCAT(date, ' ', time) ASC")
             ->get();
 
@@ -107,11 +114,11 @@ class ExpertService
             ], Response::HTTP_NOT_FOUND));
         }
 
-        $now = Carbon::now();
+        $now = Carbon::now()->subHour();
         $bookings = Booking::with(['user'])
             ->where('expert_id', $expert->id)
             ->where('status', 'completed')
-            ->whereRaw("(date + time) < ?", [$now])
+            ->whereRaw("(date + time) < ?", [$now->toDateTimeString()])
             ->orderByRaw("CONCAT(date, ' ', time) DESC")
             ->get();
 
