@@ -27,11 +27,18 @@ class UserService
     public function getFutureBookings()
     {
         $now = Carbon::now();
+        $oneHourAgo = $now->copy()->subHour()->toDateTimeString();
+
         $bookings = Booking::with(['expert.user', 'service'])
             ->where('user_id', auth()->id())
-            ->where('status', 'paid')
-            ->whereRaw("(date + time) > ?", [$now])
-            ->orderByRaw("CONCAT(date, ' ', time) ASC")
+            ->where(function ($query) use ($now, $oneHourAgo) {
+                $query->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp > ?", [$now->toDateTimeString()])
+                    ->orWhere(function ($q) use ($now, $oneHourAgo) {
+                        $q->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp <= ?", [$now->toDateTimeString()])
+                            ->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp >= ?", [$oneHourAgo]);
+                    });
+            })
+            ->orderByRaw("CONCAT(date::text, ' ', time::text)::timestamp ASC")
             ->get();
 
         $activeBookings = $bookings->map(function ($booking) {
@@ -53,11 +60,11 @@ class UserService
 
     public function getCompletedBookings()
     {
-        $now = Carbon::now();
+        $now = Carbon::now()->subHour();
         $bookings = Booking::with(['expert.user', 'service'])
             ->where('user_id', auth()->id())
             ->where('status', 'completed')
-            ->whereRaw("(date + time) < ?", [$now])
+            ->whereRaw("(date + time) < ?", [$now->toDateTimeString()])
             ->orderByRaw("CONCAT(date, ' ', time) DESC")
             ->get();
 
