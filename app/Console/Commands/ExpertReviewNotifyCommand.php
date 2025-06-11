@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Booking;
+use App\Models\Category;
 use App\Models\Expert;
 use App\Models\ExpertReview;
 use App\Models\User;
@@ -73,7 +74,9 @@ class ExpertReviewNotifyCommand extends Command
             $bookingDateTime = Carbon::createFromFormat('Y-m-d H:i:s', "{$booking->date} {$booking->time}", 'Asia/Almaty')
                 ?: Carbon::parse("{$booking->date} {$booking->time}", 'Asia/Almaty');
 
-            $response = $chat->message("*Напоминание:* Ваша консультация с экспертом была {$bookingDateTime->format('Y-m-d H:i')}. Пожалуйста оставьте отзыв о работе с пользователем!")
+            $user = User::find($booking->expert_id);
+
+            $response = $chat->message("*Напоминание:* Ваша консультация с экспертом была {$bookingDateTime->format('Y-m-d H:i')}. Пожалуйста оставьте отзыв о работе с пользователем {$user->first_name}!")
                 ->keyboard(KeyboardFactory::makeAppKeyboard(config('telegram.mini_app_url')))
                 ->send();
             \Log::info('Review reminder sent', [

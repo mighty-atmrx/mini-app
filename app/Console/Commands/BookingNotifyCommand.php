@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\Booking;
+use App\Models\Category;
+use App\Models\Expert;
 use Carbon\Carbon;
 use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Console\Command;
@@ -17,7 +19,7 @@ class BookingNotifyCommand extends Command
         $now = Carbon::now('Asia/Almaty');
 
         $bookings = Booking::where('status', 'paid')
-            ->with('user')
+            ->with('user', 'service')
             ->get()
             ->filter(function ($booking) use ($now) {
                 $datetimeString = trim("{$booking->date} {$booking->time}");
@@ -60,7 +62,10 @@ class BookingNotifyCommand extends Command
                 $timeLeft = 'завтра';
             }
 
-            $response = $chat->message("*Напоминание:* {$timeLeft} у Вас состоится консультация. *Время консультации:* {$bookingDateTime->format('H:i')}")->send();
+            $expert = Expert::find($booking->expert_id);
+            $expertCategory = Category::find($booking->service->category_id);
+
+            $response = $chat->message("*Напоминание:* {$timeLeft} у Вас состоится консультация.\n*Время консультации:* {$bookingDateTime->format('H:i')}.\n*Эксперт:* {$expert->first_name} {$expert->last_name}.\n*Категория:* {$expertCategory->title}.")->send();
             \Log::info('Reminder sent', [
                 'chat_id' => $chat->chat_id,
                 'time_left' => $timeLeft,

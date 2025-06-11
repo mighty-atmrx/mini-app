@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\Booking;
+use App\Models\Category;
+use App\Models\Expert;
 use App\Models\UserReviews;
 use App\Telegram\KeyboardFactory;
 use Carbon\Carbon;
@@ -19,7 +21,7 @@ class UserReviewNotifyCommand extends Command
         $now = Carbon::now('Asia/Almaty');
 
         $bookings = Booking::where('status', 'completed')
-            ->with('user')
+            ->with('user', 'service')
             ->get()
             ->filter(function ($booking) use ($now) {
                 $datetimeString = trim("{$booking->date} {$booking->time}");
@@ -69,7 +71,10 @@ class UserReviewNotifyCommand extends Command
             $bookingDateTime = Carbon::createFromFormat('Y-m-d H:i:s', "{$booking->date} {$booking->time}", 'Asia/Almaty')
                 ?: Carbon::parse("{$booking->date} {$booking->time}", 'Asia/Almaty');
 
-            $response = $chat->message("*Напоминание:* Ваша консультация с экспертом была {$bookingDateTime->format('Y-m-d H:i')}. Пожалуйста оставьте отзыв о работе с экспертом!")
+            $expert = Expert::find($booking->expert_id);
+            $expertCategory = Category::find($booking->service->category_id);
+
+            $response = $chat->message("*Напоминание:* Ваша консультация с экспертом была {$bookingDateTime->format('Y-m-d H:i')}. Пожалуйста оставьте отзыв о работе с экспертом " . $expert->first_name . " " . $expert->last_name . "({$expertCategory->title})!")
                 ->keyboard(KeyboardFactory::makeAppKeyboard(config('telegram.mini_app_url')))
                 ->send();
             \Log::info('Review reminder sent', [
