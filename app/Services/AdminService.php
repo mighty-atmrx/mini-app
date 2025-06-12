@@ -6,6 +6,7 @@ use App\Exports\ExpertsExport;
 use App\Repositories\ExpertRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -40,6 +41,19 @@ class AdminService
         }
 
         $this->userRepository->updateUserRole('user', $expert->user_id);
+
+        DB::table('expert_categories')
+            ->where('expert_id', $expertId)
+            ->delete();
+
+        DB::table('services')
+            ->where('expert_id', $expertId)
+            ->delete();
+
+        DB::table('experts_schedules')
+            ->where('expert_id', $expertId)
+            ->delete();
+
         return $this->expertRepository->delete($expertId);
     }
 
