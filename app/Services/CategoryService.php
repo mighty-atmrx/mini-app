@@ -108,8 +108,16 @@ class CategoryService
         }
 
         DB::table('categories')
-            ->where('position', '>=', $category->position)
+            ->where('position', '>', $category->position)
             ->decrement('position');
+
+        DB::table('expert_categories')
+            ->where('category_id', $categoryId)
+            ->delete();
+
+        DB::table('services')
+            ->where('category_id', $categoryId)
+            ->delete();
 
         return $this->categoryRepository->delete($categoryId);
     }

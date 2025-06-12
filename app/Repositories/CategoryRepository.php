@@ -8,7 +8,7 @@ class CategoryRepository
 {
     public function getAllCategories()
     {
-        return Category::all();
+        return Category::orderBy('position', 'asc')->get();
     }
 
     public function getCategoryByTitle(string $title)
