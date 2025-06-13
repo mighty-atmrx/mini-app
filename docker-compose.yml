@@ -7,9 +7,7 @@ services:
             -   .env
         container_name: php_container
         volumes:
-            - ./.env:/var/www/.env
-            - ./app:/var/www/app
-            - ./bootstrap:/var/www/bootstrap
+            - .:/var/www
             - ./config:/var/www/config
             - ./database:/var/www/database
             - ./routes:/var/www/routes
