@@ -87,6 +87,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     /*   Свободные слоты(для пользователей)   */
     Route::get('/bookings/available/{expertId}', [BookingController::class, 'getAvailableBookings'])->name('bookings.get-available-bookings');
     Route::post('/services/{serviceId}/bookings', [BookingController::class, 'store'])->name('bookings.store');
+    Route::patch('/bookings/{bookingId}', [BookingController::class, 'update'])->name('bookings.update');
 
     /*   Отзывы   */
     Route::post('/experts/{expertId}', [ReviewController::class, 'storeReviewForExpert'])->name('expert_review.store');

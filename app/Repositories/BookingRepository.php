@@ -6,6 +6,11 @@ use App\Models\Booking;
 
 class BookingRepository
 {
+    public function getBookingById(int $bookingId)
+    {
+        return Booking::find($bookingId);
+    }
+
     public function create(array $data)
     {
         return Booking::create($data);
