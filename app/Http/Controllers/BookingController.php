@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\ExpertRepository;
 use App\Repositories\ServiceRepository;
 use App\Services\BookingService;
 use Carbon\Carbon;
@@ -14,13 +15,16 @@ class BookingController extends Controller
 {
     protected $bookingService;
     protected $serviceRepository;
+    protected $expertRepository;
 
     public function __construct(
         BookingService $bookingService,
-        ServiceRepository $serviceRepository
+        ServiceRepository $serviceRepository,
+        ExpertRepository $expertRepository,
     ){
         $this->bookingService = $bookingService;
         $this->serviceRepository = $serviceRepository;
+        $this->expertRepository = $expertRepository;
     }
 
     public function getAvailableBookings(int $expertId)
@@ -41,32 +45,19 @@ class BookingController extends Controller
         }
     }
 
-    public function store(Request $request, $serviceId)
+    public function store($serviceId)
     {
         \Log::info('Store method in BookingController received.');
+
         DB::beginTransaction();
         try {
-            $data = $request->validate([
-                'date' => 'required|date_format:d.m.Y',
-                'time' => 'required|date_format:H:i',
-            ]);
             $data['service_id'] = $serviceId;
-            $data['date'] = Carbon::createFromFormat('d.m.Y', $data['date'])->format('Y-m-d');
 
-            $booking = $this->bookingService->store($data);
-            $service = $this->serviceRepository->getServiceById($serviceId);
+            $response = $this->bookingService->store($data);
             DB::commit();
 
-            \Log::info('Booking added successfully.', [
-                'booking' => $booking
-            ]);
-            return response()->json([
-                'message' => 'Запись к эксперту успешно создана.',
-                'date' => $booking->date,
-                'time' => $booking->time,
-                'service' => $service->title,
-                'service_id' => $serviceId,
-            ]);
+            \Log::info('Booking added successfully.');
+            return response()->json($response);
         } catch (HttpResponseException $e) {
             DB::rollBack();
             throw $e;
@@ -75,6 +66,34 @@ class BookingController extends Controller
             \Log::error('Store booking error', ['error' => $e->getMessage()]);
             return response()->json([
                 'message' => 'Не удалось создать запись к эксперту.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function update(Request $request, $bookingId)
+    {
+        DB::beginTransaction();
+        try {
+            $data = $request->validate([
+                'date' => 'required|date_format:d.m.Y',
+                'time' => 'required|date_format:H:i',
+            ]);
+            $data['date'] = Carbon::createFromFormat('d.m.Y', $data['date'])->format('Y-m-d');
+            $data['status'] = 'paid';
+
+            $this->bookingService->update($data, $bookingId);
+            DB::commit();
+
+            \Log::info('Booking updated successfully.', ['bookingId' => $bookingId]);
+            return response()->json(['message' => 'Данные записи успешно обновлены.']);
+        } catch (HttpResponseException $e) {
+            DB::rollback();
+            throw $e;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Update booking error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Не удалось обновить данные записи.'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

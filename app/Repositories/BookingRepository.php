@@ -11,6 +11,12 @@ class BookingRepository
         return Booking::create($data);
     }
 
+    public function update(Booking $booking, array $data)
+    {
+        $booking->update($data);
+        return $booking;
+    }
+
     public function userIsClientForThisExpert(int $expertId, int $userId): bool
     {
         return Booking::where('expert_id', $expertId)

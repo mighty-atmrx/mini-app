@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreign('service_id')->references('id')->on('services');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
-            $table->date('date');
-            $table->time('time');
+            $table->date('date')->nullable();
+            $table->time('time')->nullable();
             $table->enum('status', ['payment', 'paid', 'completed', 'failed'])->default('payment');
             $table->timestamps();
         });
