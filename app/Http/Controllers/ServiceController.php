@@ -10,9 +10,12 @@ use App\Http\Resources\ServiceResource;
 use App\Models\ExpertCategory;
 use App\Repositories\ServiceRepository;
 use App\Repositories\ExpertRepository;
+use App\Repositories\UserRepository;
+use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class ServiceController extends Controller
@@ -21,13 +24,16 @@ class ServiceController extends Controller
 
     protected $serviceRepository;
     protected $expertRepository;
+    protected $userRepository;
 
     public function __construct(
         ServiceRepository $serviceRepository,
         ExpertRepository  $expertRepository,
+        UserRepository $userRepository
     ){
         $this->serviceRepository = $serviceRepository;
         $this->expertRepository = $expertRepository;
+        $this->userRepository = $userRepository;
     }
 
     public function index(FilterRequest $request)
@@ -64,6 +70,20 @@ class ServiceController extends Controller
     {
         try {
             $services = $this->serviceRepository->getExpertServices($expertId);
+            foreach ($services as $service) {
+                $expert = $this->expertRepository->getExpertById($expertId);
+                $expert_user = $this->userRepository->findUserById($expert->user_id);
+                $expert_phone = $expert_user->phone;
+                $chat = TelegraphChat::whereRaw("encode(sha256(chat_id::text::bytea), 'hex') = ?", [$expert_user->telegram_user_id])->first();
+                if ($chat) {
+                    $expert_username = Str::replaceFirst('[private] ', '', $chat->name);
+                } else {
+                    $expert_username = '';
+                }
+
+                $service['expert_username'] = $expert_username;
+                $service['expert_phone'] = $expert_phone;
+            }
             return response()->json($services);
         } catch (\Exception $e) {
             \Log::error('Services error: ' . $e->getMessage());

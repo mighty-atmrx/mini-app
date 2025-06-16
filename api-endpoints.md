@@ -876,34 +876,41 @@
 ```json
 [
     {
-        "id": 1,
-        "expert_id": 3,
-        "title": "мой самый крутой курс",
-        "description": "описание самого крутого курса на свете",
-        "price": 10000,
-        "category_id": 1,
-        "created_at": "2025-04-29T17:40:51.000000Z",
-        "updated_at": "2025-04-29T17:40:51.000000Z",
+        "id": 12,
+        "expert_id": 10,
+        "title": "Best Programming Course",
+        "description": "лучший курс по программироанию",
+        "price": 9990,
+        "category_id": 2,
+        "created_at": "2025-06-16T00:20:08.000000Z",
+        "updated_at": "2025-06-16T00:20:08.000000Z",
+        "expert_username": "username",
+        "expert_phone": "+77083334455",
         "category": {
-            "id": 1,
-            "category": "Личностный рост",
-            "description": "(цели, дисциплина, продуктивность)",
-            "created_at": "2025-04-28T19:32:43.000000Z",
-            "updated_at": "2025-04-28T19:32:43.000000Z"
+            "id": 2,
+            "title": "Психология и коучинг",
+            "subtitle": "PsychologyAndCoaching",
+            "description": "(самооценка, уверенность, страхи)",
+            "position": 2,
+            "created_at": "2025-06-13T15:51:18.000000Z",
+            "updated_at": "2025-06-13T15:51:18.000000Z"
         }
     },
     {
-        "id": 2,
-        "expert_id": 3,
+        "id": 21,
+        "expert_id": 10,
         "title": "мой второй самый крутой курс",
         "description": "описание второго самого крутого курса на свете",
         "price": 14990,
         "category_id": 1,
         "created_at": "2025-04-29T18:19:34.000000Z",
         "updated_at": "2025-04-29T18:19:34.000000Z",
+        "expert_username": "username",
+        "expert_phone": "+77083334455",
         "category": {
             "id": 1,
             "category": "Личностный рост",
+            "subtitle": "PersonalGrowth",
             "description": "(цели, дисциплина, продуктивность)",
             "created_at": "2025-04-28T19:32:43.000000Z",
             "updated_at": "2025-04-28T19:32:43.000000Z"

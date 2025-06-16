@@ -30,21 +30,15 @@ class AskClientIfBookedCommand extends Command
                 $now->copy()->subMinutes(1439),
             ])->get();
 
-        \Log::info($bookings->count());
-
         foreach ($bookings as $booking) {
-            \Log::info(11111);
             $telegramUserId = $booking->user->telegram_user_id;
             $chat = TelegraphChat::whereRaw("encode(sha256(chat_id::text::bytea), 'hex') = ?", [$telegramUserId])->first();
-            \Log::info(22222);
             if (!$chat) {
                 \Log::warning('Chat not found for user', ['user_id' => $booking->user->id, 'telegram_user_id' => $telegramUserId]);
                 continue;
             }
-            \Log::info(333333);
 
             $expert = Expert::find($booking->expert_id);
-            \Log::info(444444);
             $keyboard = ReplyKeyboard::make()->oneTime()->resize()
                 ->row([ReplyButton::make('✅ Да')])
                 ->row([ReplyButton::make('❌ Нет')]);

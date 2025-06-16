@@ -106,25 +106,7 @@ class BookingService
 //            ->where('time', $data['time'])
 //            ->delete();
 
-        $this->bookingRepository->create($data);
-        $expert_user = $this->userRepository->findUserById($expert->user_id);
-        $expert_phone = $expert_user->phone;
-        $chat = TelegraphChat::whereRaw("encode(sha256(chat_id::text::bytea), 'hex') = ?", [$expert_user->telegram_user_id])->first();
-        if ($chat) {
-            $expert_username = Str::replaceFirst('[private] ', '', $chat->name);
-        } else {
-            $expert_username = '';
-        }
-
-        return [
-            'message' => 'Запись к эксперту успешно создана.',
-            'expert_name' => $expert->first_name,
-            'expert_last_name' => $expert->last_name,
-            'expert_tg_username' => $expert_username,
-            'expert_phone' => $expert_phone,
-            'service' => $service->title,
-            'service_id' => $service->id,
-        ];
+        return $this->bookingRepository->create($data);
     }
 
     public function update(array $data, int $bookingId)

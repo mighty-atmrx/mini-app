@@ -52,12 +52,14 @@ class BookingController extends Controller
         DB::beginTransaction();
         try {
             $data['service_id'] = $serviceId;
+            $this->bookingService->store($data);
 
-            $response = $this->bookingService->store($data);
             DB::commit();
-
             \Log::info('Booking added successfully.');
-            return response()->json($response);
+
+            return response()->json([
+                'message' => 'Запись к эксперту успешно создана.'
+            ]);
         } catch (HttpResponseException $e) {
             DB::rollBack();
             throw $e;
