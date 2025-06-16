@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\ExpertsExport;
+use App\Exports\RejectedBookingsExport;
 use App\Exports\StatisticExport;
 use App\Exports\UsersExport;
 use App\Services\AdminService;
@@ -138,6 +139,30 @@ class AdminController extends Controller
             \Log::error('Admin export statistic to excel error.', ['error' => $e->getMessage()]);
             return response()->json([
                 'message' => 'Не удалось выгрузить данные статистики.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function exportRejectedBookings()
+    {
+        \Log::info('Admin export rejected bookings to excel method received.');
+
+        try {
+            if (auth()->user()->role !== 'admin') {
+                \Log::error('User is not an admin.');
+                return response()->json([
+                    'message' => 'Доступ запрещен.'
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            return Excel::download(new RejectedBookingsExport(), 'rejectedBookings.xlsx', \Maatwebsite\Excel\Excel::XLSX, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="users.xlsx"',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Admin export rejected bookings to excel error.', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Не удалось выгрузить данные отмененных записей.'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

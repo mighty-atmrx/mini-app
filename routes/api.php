@@ -95,6 +95,9 @@ Route::middleware(['jwt.verify'])->group(function () {
 
     /*   Статистика   */
     Route::get('/statistics', [AdminController::class, 'exportStatistic'])->name('admin.export_statistic');
+
+    /*   Отмененные запими   */
+    Route::get('/rejected-bookings', [AdminController::class, 'exportRejectedBookings'])->name('admin.export_rejected_bookings');
 });
 Route::post('/telegram/{bot}/webhook', [Handler::class, 'handle'])->middleware('fix_telegraph_bot');
 Route::post('auth/telegram', [TelegramAuthController::class, 'authenticate']);
