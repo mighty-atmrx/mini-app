@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\AskClientIfBookedCommand;
 use App\Console\Commands\BookingNotifyCommand;
 use App\Console\Commands\DeleteOldExpertSchedules;
 use App\Console\Commands\ExpertReviewNotifyCommand;
@@ -18,6 +19,7 @@ class Kernel extends ConsoleKernel
         BookingNotifyCommand::class,
         UserReviewNotifyCommand::class,
         ExpertReviewNotifyCommand::class,
+        AskClientIfBookedCommand::class,
     ];
 
     protected function schedule(Schedule $schedule)
@@ -27,6 +29,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:booking-notify-command')->everyMinute();
         $schedule->command('app:user-review-notify-command')->everyMinute();
         $schedule->command('app:expert-review-notify-command')->everyMinute();
+        $schedule->command('app:ask-client-if-booked-command')->everyMinute();
     }
 
     protected function commands()

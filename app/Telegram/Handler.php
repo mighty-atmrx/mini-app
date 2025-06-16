@@ -2,9 +2,12 @@
 
 namespace App\Telegram;
 
+use App\Models\Booking;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Services\UserService;
+use App\Telegram\State\AwaitingBookingDateTimeState;
+use App\Telegram\State\AwaitingRejectReasonState;
 use App\Telegram\State\BirthdateState;
 use App\Telegram\State\NameState;
 use App\Telegram\State\PhoneManualState;
@@ -13,6 +16,7 @@ use App\Telegram\State\StateManager;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
 use DefStudio\Telegraph\Keyboard\Button;
 use DefStudio\Telegraph\Keyboard\Keyboard;
+use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Stringable;
 
@@ -117,11 +121,39 @@ class Handler extends WebhookHandler
 
         $stateManager = new StateManager($this->chat);
         $step = $stateManager->getStep($this->chat);
+        $userData = $stateManager->getUserData($this->chat);
+
+        if ($step === 'awaiting_booking_confirmation') {
+            $userResponse = trim($text->toString());
+
+            if ($userResponse === '✅ Да') {
+                $stateManager->setStep($this->chat, 'awaiting_booking_datetime');
+                \Log::info('User confirmed booking, switching to awaiting_booking_datetime');
+                app(AwaitingBookingDateTimeState::class, ['stateManager' => $stateManager])
+                    ->prompt($this->chat);
+                return;
+            }
+
+            if ($userResponse === '❌ Нет') {
+                $stateManager->setStep($this->chat, 'awaiting_reject_reason');
+                \Log::info('User rejected booking, switching to awaiting_reject_reason');
+                app(AwaitingRejectReasonState::class, ['stateManager' => $stateManager])
+                    ->prompt($this->chat);
+                return;
+            }
+
+            $this->chat->message('Пожалуйста, выбери один из вариантов: ✅ Да или ❌ Нет')->send();
+            return;
+        }
+
         $stateMap = [
             'name' => NameState::class,
             'phone' => PhoneState::class,
             'phone_manual' => PhoneManualState::class,
             'birthdate' => BirthdateState::class,
+            'awaiting_booking_datetime' => AwaitingBookingDateTimeState::class,
+            'awaiting_reject_reason' => AwaitingRejectReasonState::class,
+
         ];
 
         if (!isset($stateMap[$step])) {
@@ -132,7 +164,13 @@ class Handler extends WebhookHandler
         $state = new $stateMap[$step]($stateManager);
         $nextState = $state->handle($this->chat, $text, $this->message);
 
-        if ($nextState) {
+        if ($nextState === $state && $state instanceof AwaitingBookingDateTimeState) {
+            if (!$this->isFirstInput($this->chat, $text)) {
+                \Log::info('Skipping prompt after invalid input', ['step' => $step, 'chat_id' => $this->chat->chat_id]);
+            } else {
+                $state->prompt($this->chat);
+            }
+        } elseif ($nextState) {
             \Log::info('Calling prompt for next state', ['next_step' => $stateManager->getStep($this->chat)]);
             $nextState->prompt($this->chat);
         } else {
@@ -144,6 +182,12 @@ class Handler extends WebhookHandler
                     'telegram_id' => $this->chat->chat_id,
                     'user_data' => $userData,
                 ]);
+
+                if (in_array($step, ['awaiting_booking_datetime', 'awaiting_reject_reason'])) {
+                    \Log::info('Skipping registration check for booking-related step', ['step' => $step, 'chat_id' => $this->chat->chat_id]);
+                    $stateManager->clear($this->chat);
+                    return;
+                }
 
                 if (isset($userData['last_attempted_phone']) && $text->toString() === $userData['last_attempted_phone']) {
                     \Log::info('Validation error message already sent, skipping prompt');
@@ -202,5 +246,55 @@ class Handler extends WebhookHandler
         $this->chat->message('Click to open the Mini App')
             ->keyboard(KeyboardFactory::makeAppKeyboard(config('telegram.mini_app_url')))
             ->send();
+    }
+
+    private function isFirstInput(TelegraphChat $chat, Stringable $text): bool
+    {
+        $stateManager = new StateManager($chat);
+        $userData = $stateManager->getUserData($chat);
+        return !isset($userData['last_input_time']) || $userData['last_input_time'] !== $text->toString();
+    }
+
+    public function handleAction(Stringable $action): void
+    {
+        if (str_starts_with($action, 'booking_yes_')) {
+            $bookingId = (int)str_replace('booking_yes_', '', $action);
+            $this->handleBookingYes($bookingId);
+        } elseif (str_starts_with($action, 'booking_no_')) {
+            $bookingId = (int)str_replace('booking_no_', '', $action);
+            $this->handleBookingNo($bookingId);
+        } else {
+            \Log::warning('Неизвестный action получен', ['action' => $action]);
+            $this->chat->message('Неизвестное действие')->send();
+        }
+    }
+
+    public function handleBookingYes(int $bookingId): void
+    {
+        $booking = Booking::find($bookingId);
+        if ($booking) {
+            $this->chat->message('Отлично! Пожалуйста, укажите дату и время записи. Например: 01.01.2025 10:00.')
+                ->send();
+
+            $stateManager = new StateManager($this->chat);
+            $stateManager->setStep($this->chat, 'awaiting_booking_datetime');
+            $currentData = $stateManager->getUserData($this->chat);
+            $currentData['booking_id'] = $bookingId;
+            $stateManager->setUserData($this->chat, $currentData);
+        }
+    }
+
+    public function handleBookingNo(int $bookingId): void
+    {
+        $booking = Booking::find($bookingId);
+        if ($booking) {
+            $this->chat->message('Пожалуйста, укажите причину отмены?')->send();
+
+            $stateManager = new StateManager($this->chat);
+            $stateManager->setStep($this->chat, 'awaiting_reject_reason');
+            $currentData = $stateManager->getUserData($this->chat);
+            $currentData['booking_id'] = $bookingId;
+            $stateManager->setUserData($this->chat, $currentData);
+        }
     }
 }
