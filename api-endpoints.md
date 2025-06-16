@@ -194,15 +194,28 @@
   ```json
   [
     {
-        "service_title": "Как перестать бояться говорить на публику",
-        "date": "2025-06-11",
-        "time": "11:00:00",
-        "expert_first_name": "Сергей",
-        "expert_last_name": "Бурунов",
+        "service_title": "brvoeriv",
+        "date": "2025-06-17",
+        "time": "12:00:00",
+        "expert_first_name": "MRX",
+        "expert_last_name": "MRX",
+        "expert_photo": "http://bluejay-pretty-clearly.ngrok-free.app/storage/experts/1owOEzSkPDQX23qWIA1HSAXGUUA9FFx4Ta0rxpEh.jpg",
+        "expert_id": 9,
+        "expert_rating": 0,
+        "expert_username": "magomedD",
+        "expert_phone": "+77007073355"
+    },
+    {
+        "service_title": "Курс для новых руководителей",
+        "date": null,
+        "time": null,
+        "expert_first_name": "Магомед",
+        "expert_last_name": "Магомедов",
         "expert_photo": "https://randomuser.me/api/portraits/men/64.jpg",
-        "expert_phone": "+77087674343",
-        "expert_id": 2,
-        "expert_rating": 3
+        "expert_id": 4,
+        "expert_rating": 5,
+        "expert_username": "magomedD",
+        "expert_phone": "+77098765432"
     }
   ]
   ```
@@ -221,16 +234,17 @@
   ```json
   [
     {
-        "service_title": "Бесплатный курс по пирожкам",
-        "date": "2025-06-10",
-        "time": "12:00:00",
-        "expert_first_name": "Василий",
-        "expert_last_name": "Олохов",
-        "expert_photo": "https://randomuser.me/api/portraits/men/17.jpg",
-        "expert_phone": "+77056562323",
-        "expert_id": 1,
-        "expert_rating": 2,
-        "date_of_purchase": "2025-06-08T17:04:57.000000Z"
+        "service_title": "Крутой курс для крутых парней",
+        "date": "2025-06-15",
+        "time": "11:00:00",
+        "expert_first_name": "PROG",
+        "expert_last_name": "PROG",
+        "expert_photo": "http://bluejay-pretty-clearly.ngrok-free.app/storage/experts/sjI66d4fcknatQ9WWgDjnBP1q7fv6AcRHS10HYsO.jpg",
+        "expert_id": 10,
+        "expert_rating": 0,
+        "date_of_purchase": "2025-06-13T16:42:53.000000Z",
+        "expert_username": "programmer1",
+        "expert_phone": "+77083334455"
     },
     {
         "service_title": "Курс по обществознанию",
@@ -239,10 +253,11 @@
         "expert_first_name": "Петр",
         "expert_last_name": "Петров",
         "expert_photo": "https://randomuser.me/api/portraits/women/46.jpg",
-        "expert_phone": "+77012345678",
         "expert_id": 3,
         "expert_rating": 4,
-        "date_of_purchase": null
+        "date_of_purchase": null,
+        "expert_username": "petyapetrov",
+        "expert_phone": "+77012345678"
     }
   ]
   ```

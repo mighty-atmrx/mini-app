@@ -3,25 +3,28 @@
 namespace App\Services;
 
 use App\Models\Booking;
-use App\Models\Expert;
-use App\Models\Service;
-use App\Models\User;
+use App\Repositories\ExpertRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\UserReviewsRepository;
 use Carbon\Carbon;
+use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Str;
 
 class UserService
 {
     protected $userRepository;
     protected $userReviewsRepository;
+    protected $expertRepository;
 
     public function __construct(
         UserRepository $userRepository,
         UserReviewsRepository $userReviewsRepository,
+        ExpertRepository $expertRepository,
     ){
         $this->userRepository = $userRepository;
         $this->userReviewsRepository = $userReviewsRepository;
+        $this->expertRepository = $expertRepository;
     }
 
     public function getFutureBookings()
@@ -32,16 +35,49 @@ class UserService
         $bookings = Booking::with(['expert.user', 'service'])
             ->where('user_id', auth()->id())
             ->where(function ($query) use ($now, $oneHourAgo) {
-                $query->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp > ?", [$now->toDateTimeString()])
-                    ->orWhere(function ($q) use ($now, $oneHourAgo) {
-                        $q->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp <= ?", [$now->toDateTimeString()])
-                            ->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp >= ?", [$oneHourAgo]);
+                $query->where(function ($q) use ($now, $oneHourAgo) {
+                    $q->where('status', 'paid')
+                        ->whereNotNull('date')
+                        ->whereNotNull('time')
+                        ->whereRaw("TRIM(date::text) != ''")
+                        ->whereRaw("TRIM(time::text) != ''")
+                        ->where(function ($sub) use ($now, $oneHourAgo) {
+                            $sub->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp > ?", [$now->toDateTimeString()])
+                                ->orWhere(function ($inner) use ($now, $oneHourAgo) {
+                                    $inner->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp <= ?", [$now->toDateTimeString()])
+                                        ->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp >= ?", [$oneHourAgo]);
+                                });
+                        });
+                })
+                    ->orWhere(function ($q) {
+                        $q->where('status', 'payment')
+                            ->where(function ($sub) {
+                                $sub->whereNull('date')
+                                    ->orWhereRaw("TRIM(COALESCE(date::text, '')) = ''");
+                            })
+                            ->where(function ($sub) {
+                                $sub->whereNull('time')
+                                    ->orWhereRaw("TRIM(COALESCE(time::text, '')) = ''");
+                            });
                     });
             })
-            ->orderByRaw("CONCAT(date::text, ' ', time::text)::timestamp ASC")
+            ->orderByRaw("
+            CASE
+                WHEN TRIM(COALESCE(date::text, '')) != '' AND TRIM(COALESCE(time::text, '')) != ''
+                THEN CONCAT(date::text, ' ', time::text)::timestamp
+                ELSE NULL
+            END ASC NULLS LAST
+        ")
             ->get();
 
         $activeBookings = $bookings->map(function ($booking) {
+            $chat = TelegraphChat::whereRaw("encode(sha256(chat_id::text::bytea), 'hex') = ?", [$booking->expert->user->telegram_user_id])->first();
+            if ($chat) {
+                $expert_username = Str::replaceFirst('[private] ', '', $chat->name);
+            } else {
+                $expert_username = '';
+            }
+
             return [
                 'service_title' => $booking->service->title,
                 'date' => $booking->date,
@@ -49,9 +85,10 @@ class UserService
                 'expert_first_name' => $booking->expert->first_name,
                 'expert_last_name' => $booking->expert->last_name,
                 'expert_photo' => $booking->expert->photo,
-                'expert_phone' => $booking->expert->user->phone,
                 'expert_id' => $booking->expert->id,
                 'expert_rating' => $booking->expert->rating,
+                'expert_username' => $expert_username,
+                'expert_phone' => $booking->expert->user->phone,
             ];
         })->all();
 
@@ -69,6 +106,12 @@ class UserService
             ->get();
 
         $completedBookings = $bookings->map(function ($booking) {
+            $chat = TelegraphChat::whereRaw("encode(sha256(chat_id::text::bytea), 'hex') = ?", [$booking->expert->user->telegram_user_id])->first();
+            if ($chat) {
+                $expert_username = Str::replaceFirst('[private] ', '', $chat->name);
+            } else {
+                $expert_username = '';
+            }
             return [
                 'service_title' => $booking->service->title,
                 'date' => $booking->date,
@@ -76,10 +119,11 @@ class UserService
                 'expert_first_name' => $booking->expert->first_name,
                 'expert_last_name' => $booking->expert->last_name,
                 'expert_photo' => $booking->expert->photo,
-                'expert_phone' => $booking->expert->user->phone,
                 'expert_id' => $booking->expert->id,
                 'expert_rating' => $booking->expert->rating,
                 'date_of_purchase' => $booking->created_at,
+                'expert_username' => $expert_username,
+                'expert_phone' => $booking->expert->user->phone,
             ];
         })->all();
 
