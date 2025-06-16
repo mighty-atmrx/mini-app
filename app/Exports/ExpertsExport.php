@@ -15,7 +15,25 @@ class ExpertsExport implements FromCollection, WithHeadings, WithStyles
     */
     public function collection()
     {
-        return Expert::all();
+        return Expert::with('bookings')
+            ->get()
+            ->map(function ($expert) {
+                return [
+                    'id' => $expert->id,
+                    'user_id' => $expert->user_id,
+                    'first_name' => $expert->first_name,
+                    'last_name' => $expert->last_name,
+                    'profession' => $expert->profession,
+                    'biography' => $expert->biography,
+                    'photo' => $expert->photo,
+                    'experience' => $expert->experience,
+                    'education' => $expert->education,
+                    'rating' => $expert->rating,
+                    'bookings_qty' => $expert->bookings->count(),
+                    'created_at' => $expert->created_at,
+                    'updated_at' => $expert->updated_at,
+               ];
+            });
     }
 
     public function headings(): array
@@ -23,7 +41,8 @@ class ExpertsExport implements FromCollection, WithHeadings, WithStyles
         return [
             'id', 'user_id', 'Имя', 'Фамилия',
             'Профессия', 'Биография', 'Фото',
-            'Опыт', 'Образования', 'Рейтинг', 'created_at', 'updated_at',
+            'Опыт', 'Образования', 'Рейтинг',
+            'Кол-во записей', 'created_at', 'updated_at'
         ];
     }
 
