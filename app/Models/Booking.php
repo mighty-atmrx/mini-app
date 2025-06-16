@@ -10,7 +10,10 @@ class Booking extends Model
     use HasFactory;
 
     protected $table = 'bookings';
-    protected $fillable = ['expert_id', 'service_id', 'user_id', 'date', 'time', 'status'];
+    protected $fillable = [
+        'expert_id', 'service_id', 'user_id',
+        'date', 'time', 'status', 'reject_reason'
+    ];
 
     public function user()
     {

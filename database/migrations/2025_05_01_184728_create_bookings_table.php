@@ -21,7 +21,8 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users');
             $table->date('date')->nullable();
             $table->time('time')->nullable();
-            $table->enum('status', ['payment', 'paid', 'completed', 'failed'])->default('payment');
+            $table->enum('status', ['payment', 'paid', 'completed', 'rejected'])->default('payment');
+            $table->string('reject_reason')->nullable();
             $table->timestamps();
         });
     }

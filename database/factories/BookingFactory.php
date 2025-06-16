@@ -21,7 +21,7 @@ class BookingFactory extends Factory
         static $usersIds = [1, 2, 5, 1, 2, 5];
         static $dates = ['2025-06-07', '2025-06-08', '2025-06-07', '2025-06-08', '2025-06-07', '2025-06-08'];
         static $times = ['11:00:00', '15:00:00', '12:00:00', '16:00:00', '13:00:00', '17:00:00'];
-        static $statuses = ['payment', 'paid', 'completed', 'failed', 'completed', 'completed'];
+        static $statuses = ['payment', 'paid', 'completed', 'rejected', 'completed', 'completed'];
 
         static $index = 0;
 
