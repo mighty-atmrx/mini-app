@@ -157,7 +157,7 @@ class AdminController extends Controller
 
             return Excel::download(new RejectedBookingsExport(), 'rejectedBookings.xlsx', \Maatwebsite\Excel\Excel::XLSX, [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'Content-Disposition' => 'attachment; filename="users.xlsx"',
+                'Content-Disposition' => 'attachment; filename="rejectedBookings.xlsx"',
             ]);
         } catch (\Exception $e) {
             \Log::error('Admin export rejected bookings to excel error.', ['error' => $e->getMessage()]);
