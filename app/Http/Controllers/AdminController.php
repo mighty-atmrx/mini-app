@@ -85,7 +85,7 @@ class AdminController extends Controller
 
             return Excel::download(new ExpertsExport, 'experts.xlsx', \Maatwebsite\Excel\Excel::XLSX, [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'Content-Disposition' => 'attachment; filename="users.xlsx"',
+                'Content-Disposition' => 'attachment; filename="experts.xlsx"',
             ]);
         } catch (\Exception $e) {
             \Log::error('Admin export experts to excel error.', ['error' => $e->getMessage()]);
@@ -133,7 +133,7 @@ class AdminController extends Controller
 
             return Excel::download(new StatisticExport(), 'statistic.xlsx', \Maatwebsite\Excel\Excel::XLSX, [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'Content-Disposition' => 'attachment; filename="users.xlsx"',
+                'Content-Disposition' => 'attachment; filename="statistic.xlsx"',
             ]);
         } catch (\Exception $e) {
             \Log::error('Admin export statistic to excel error.', ['error' => $e->getMessage()]);
