@@ -85,11 +85,15 @@ class UserController extends Controller
             $user = $this->userService->userCreate($data, $data['telegram_user_id']);
             DB::commit();
             \Log::info('User created', ['user' => $user]);
-            return response()->json($user);
+            return response()->json([
+                'message' => 'Пользователь успешно создан'
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('User creation failed', ['error' => $e->getMessage()]);
-            return response()->json(['User creation failed'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json([
+                'message' => 'Ошибка создания пользователя.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
