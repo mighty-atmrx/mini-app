@@ -62,12 +62,14 @@ class UserService
                     });
             })
             ->orderByRaw("
-            CASE
-                WHEN TRIM(COALESCE(date::text, '')) != '' AND TRIM(COALESCE(time::text, '')) != ''
-                THEN CONCAT(date::text, ' ', time::text)::timestamp
-                ELSE NULL
-            END ASC NULLS LAST
-        ")
+                CASE
+                    WHEN date IS NOT NULL AND time IS NOT NULL
+                         AND TRIM(COALESCE(date::text, '')) != ''
+                         AND TRIM(COALESCE(time::text, '')) != ''
+                    THEN CONCAT(date::text, ' ', time::text)::timestamp
+                    ELSE NULL
+                END ASC NULLS LAST
+            ")
             ->get();
 
         $activeBookings = $bookings->map(function ($booking) {
