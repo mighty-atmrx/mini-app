@@ -78,16 +78,45 @@ class ExpertService
         $now = Carbon::now();
         $oneHourAgo = $now->copy()->subHour()->toDateTimeString();
 
+
         $bookings = Booking::with(['user'])
             ->where('expert_id', $expert->id)
             ->where(function ($query) use ($now, $oneHourAgo) {
-                $query->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp > ?", [$now->toDateTimeString()])
-                    ->orWhere(function ($q) use ($now, $oneHourAgo) {
-                        $q->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp <= ?", [$now->toDateTimeString()])
-                            ->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp >= ?", [$oneHourAgo]);
+                $query->where(function ($q) use ($now, $oneHourAgo) {
+                    $q->where('status', 'paid')
+                        ->whereNotNull('date')
+                        ->whereNotNull('time')
+                        ->whereRaw("TRIM(date::text) != ''")
+                        ->whereRaw("TRIM(time::text) != ''")
+                        ->where(function ($sub) use ($now, $oneHourAgo) {
+                            $sub->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp > ?", [$now->toDateTimeString()])
+                                ->orWhere(function ($inner) use ($now, $oneHourAgo) {
+                                    $inner->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp <= ?", [$now->toDateTimeString()])
+                                        ->whereRaw("CONCAT(date::text, ' ', time::text)::timestamp >= ?", [$oneHourAgo]);
+                                });
+                        });
+                })
+                    ->orWhere(function ($q) {
+                        $q->where('status', 'payment')
+                            ->where(function ($sub) {
+                                $sub->whereNull('date')
+                                    ->orWhereRaw("TRIM(COALESCE(date::text, '')) = ''");
+                            })
+                            ->where(function ($sub) {
+                                $sub->whereNull('time')
+                                    ->orWhereRaw("TRIM(COALESCE(time::text, '')) = ''");
+                            });
                     });
             })
-            ->orderByRaw("CONCAT(date, ' ', time) ASC")
+            ->orderByRaw("
+            CASE
+                WHEN date IS NOT NULL AND time IS NOT NULL
+                     AND TRIM(COALESCE(date::text, '')) != ''
+                     AND TRIM(COALESCE(time::text, '')) != ''
+                THEN CONCAT(date::text, ' ', time::text)::timestamp
+                ELSE NULL
+            END ASC NULLS LAST
+        ")
             ->get();
 
         $activeBookings = $bookings->map(function ($booking) {
