@@ -10,7 +10,7 @@ use App\Models\UserReviews;
 
 class GetPendingReviews
 {
-    public function forUser($user)
+    public function forUser(User $user)
     {
         $bookings = Booking::where('user_id', $user->id)
             ->where('status', 'completed')
@@ -22,9 +22,11 @@ class GetPendingReviews
         foreach ($bookings as $expertId => $grouped) {
             $total = $grouped->count();
 
-            $given = UserReviews::where('user_id', $user->id)
+            $given = ExpertReview::where('user_id', $user->id)
                 ->where('expert_id', $expertId)
                 ->count();
+
+            \Log::info('LOG: total = ' . $total . ', given = ' . $given);
 
             if ($given < $total) {
                 $expert = Expert::find($expertId);
@@ -54,7 +56,7 @@ class GetPendingReviews
 
         foreach ($bookings as $userId => $grouped) {
             $total = $grouped->count();
-            $given = ExpertReview::where('expert_id', $expert->id)
+            $given = UserReviews::where('expert_id', $expert->id)
                 ->where('user_id', $userId)
                 ->count();
 
