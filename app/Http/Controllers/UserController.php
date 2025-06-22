@@ -136,7 +136,7 @@ class UserController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
-        $reviews = $user->reviews()->with('user')->paginate(5);
+        $reviews = $user->reviews()->with('user')->get();
 
         $userCountBookingsForThisExpert = $this->bookingRepository
             ->userCountBookingsForThisExpert($expert->id, $userId);

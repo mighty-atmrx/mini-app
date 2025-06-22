@@ -66,7 +66,7 @@ class ExpertController extends Controller
         }
     }
 
-    public function getParticularExpert($expertId)
+    public function getParticularExpert(int $expertId)
     {
         $expert = $this->expertRepository->getExpertById($expertId);
         if ($expert == null) {
@@ -76,7 +76,7 @@ class ExpertController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
-        $reviews = $expert->reviews()->with('user')->paginate(5);
+        $reviews = $expert->reviews()->with('user')->get();
 
         $userReviewsForThisExpert = $this->expertReviewsRepository
             ->userReviewsForThisExpert($expertId, auth()->id());
