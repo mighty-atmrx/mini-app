@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Booking;
+use App\Models\Expert;
 use App\Models\ExpertsSchedule;
 use App\Repositories\BookingRepository;
 use App\Repositories\ExpertRepository;
@@ -70,6 +71,21 @@ class BookingService
             throw new HttpResponseException(response()->json([
                 'message' => 'Service not found.'
             ], Response::HTTP_NOT_FOUND));
+        }
+
+        if (Expert::where('user_id', auth()->id())->exists()) {
+            $userIsAnExpert = Expert::with('services')->where('user_id', auth()->id())->first();
+            $hasService = $userIsAnExpert && $userIsAnExpert->services->contains('id', $data['service_id']);
+            if ($hasService) {
+                \Log::error('An expert cannot enroll in his own course.', [
+                    'user_id' => auth()->id(),
+                    'expert_id' => $userIsAnExpert->id,
+                    'service_id' => $data['service_id']
+                ]);
+                throw new HttpResponseException(response()->json([
+                    'message' => 'Вы не можете записаться на свой же курс'
+                ], Response::HTTP_FORBIDDEN));
+            }
         }
 
         $expert =  $this->expertRepository->getExpertById($service->expert_id);
