@@ -105,3 +105,6 @@ Route::post('auth/telegram/refresh', [TelegramAuthController::class, 'refresh'])
 
 Route::post('/users', [UserController::class, 'store'])->name('user.store');
 
+Route::get('/ping', function () {
+    return 0;
+});
