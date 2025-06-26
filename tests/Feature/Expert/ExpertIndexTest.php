@@ -50,4 +50,34 @@ class ExpertIndexTest extends TestCase
 
         $response->assertUnauthorized();
     }
+
+    public function test_index_applies_filters_correctly(): void
+    {
+        for ($i = 0; $i < 4; $i++) {
+            $user = User::factory()->create();
+            Expert::factory()->create(['user_id' => $user->id, 'rating' => 5.0]);
+        }
+
+        $user = User::factory()->create();
+        $token = JWTAuth::fromUser($user);
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->get('/api/experts');
+
+        $response->assertOk();
+        $response->assertJsonCount(4, 'data');
+        $response->assertJsonStructure([
+            'data' => [
+                '*' => [
+                    'id', 'user_id', 'first_name', 'last_name',
+                    'profession', 'biography', 'photo', 'experience',
+                    'education', 'rating', 'created_at', 'updated_at',
+                    'categories'
+                ]
+            ]
+        ]);
+        foreach ($response->json('data') as $expert) {
+            $this->assertEquals(5.0, $expert['rating']);
+        }
+    }
 }
