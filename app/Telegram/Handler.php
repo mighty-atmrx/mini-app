@@ -41,7 +41,7 @@ class Handler extends WebhookHandler
             return;
         }
 
-        $imageUrl = config('telegram.image_url', 'https://bluejay-pretty-clearly.ngrok-free.app/expert.jpg');
+        $imageUrl = config('telegram.image_url');
 
         $user = $this->userRepository->findByTelegramId(hash('sha256', $this->chat->chat_id));
         \Log::info('User check in start', [
@@ -54,7 +54,7 @@ class Handler extends WebhookHandler
                 'telegram_id' => $this->chat->chat_id,
                 'user_id' => $user->id,
             ]);
-            $this->chat->photo($imageUrl)
+            $this->chat->photo(config('telegram.image_url'))
                 ->markdown("*Привет, {$user->first_name}!* Рады видеть тебя снова!")
                 ->keyboard(KeyboardFactory::makeAppKeyboard(config('telegram.mini_app_url')))
                 ->send();
@@ -62,7 +62,7 @@ class Handler extends WebhookHandler
         }
 
         \Log::info('No user found, starting registration', ['telegram_id' => $this->chat->chat_id]);
-        $this->chat->photo($imageUrl)
+        $this->chat->photo(config('telegram.image_url'))
             ->markdown("*Привет! Нажми “Продолжить”* для регистрации.")
             ->keyboard(Keyboard::make()->buttons([
                 Button::make('Продолжить')->action('getUserData'),
